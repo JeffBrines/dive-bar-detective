@@ -1,0 +1,14 @@
+googlemaps
+supabase
+pandas
+python-dotenv
+requests
+fastapi
+uvicorn
+outscraper
+scikit-learn
+textblob
+umap-learn
+bertopic
+transformers
+openai

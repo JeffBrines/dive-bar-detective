@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dive Bar Detective</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    
+    <style>
+        :root {
+            --gem-color: #27ae60;
+            --solid-color: #2980b9;
+            --meh-color: #95a5a6;
+            --bg-color: #f4f4f9;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0; /* Remove default padding for full layout */
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            line-height: 1.1;
+        }
+        .byline {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-link {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 10px;
+            padding: 7px 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .header-link:hover { border-color: rgba(255,255,255,0.7); }
+
+        /* About modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            z-index: 2200;
+        }
+        .modal-overlay.show { display: block; }
+        .modal {
+            position: fixed;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(720px, 92vw);
+            max-height: calc(100vh - 110px);
+            overflow-y: auto;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            z-index: 2300;
+            display: none;
+        }
+        .modal.show { display: block; }
+        .modal-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .modal-title { margin: 0; font-size: 1.05rem; }
+        .modal-body { padding: 12px 16px 16px; color: #333; line-height: 1.5; font-size: 0.95rem; }
+        .modal-body ul { margin: 8px 0 0 18px; }
+        .modal-body li { margin: 6px 0; }
+
+        /* Small info button */
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #111827;
+            font-weight: 900;
+            font-size: 0.85rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .info-btn:hover { background: #f3f4f6; }
+
+        /* Layout */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden; /* Hide scroll on body */
+            height: calc(100vh - 60px); /* Adjust for header */
+        }
+
+        /* Sidebar (List & Filters) */
+        .sidebar {
+            width: 450px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .filters-container {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .filters-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .filters-toggle button {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            background: #2c3e50;
+            color: #fff;
+            border: 1px solid #2c3e50;
+            cursor: pointer;
+        }
+        .filters-toggle button:hover { background: #34495e; border-color: #34495e; }
+
+        .advanced-filters {
+            display: none;
+        }
+        .advanced-filters.show {
+            display: contents; /* keep grid layout without extra wrappers */
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #555;
+        }
+        
+        select, button {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .search-btn {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            grid-column: span 2;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .search-btn:hover { background-color: #34495e; }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        /* Map Container */
+        #map {
+            flex: 1;
+            height: 100%;
+            background: #e5e5e5;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #fafafa;
+        }
+
+        .card.focused {
+            outline: 2px solid #2c3e50;
+            outline-offset: 2px;
+            background-color: #f9fafb;
+        }
+        
+        .card.gem { border-left-color: var(--gem-color); }
+        .card.solid { border-left-color: var(--solid-color); }
+        .card.meh { border-left-color: var(--meh-color); }
+
+        .info h2 { margin: 0 0 5px; font-size: 1.1rem; }
+        .meta { color: #666; font-size: 0.85rem; line-height: 1.4; }
+        
+        .badges { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+        .badge { background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; }
+        .badge.ml { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .badge.vibe { background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        
+        .score-box { text-align: center; min-width: 70px; }
+        .dive-score { font-size: 2.2rem; font-weight: 900; display: block; letter-spacing: 0.02em; }
+        .score-sub { font-size: 0.72rem; color: #666; margin-top: 2px; }
+        .gem .dive-score { color: var(--gem-color); }
+        .solid .dive-score { color: var(--solid-color); }
+        .meh .dive-score { color: var(--meh-color); }
+        .gem-label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+
+        .loading { text-align: center; margin-top: 30px; color: #666; }
+
+        /* Details Panel */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            z-index: 2000;
+        }
+        .overlay.show { display: block; }
+
+        .details-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: min(420px, 92vw);
+            background: white;
+            z-index: 2100;
+            box-shadow: -8px 0 24px rgba(0,0,0,0.15);
+            transform: translateX(110%);
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .details-panel.show { transform: translateX(0); }
+
+        .details-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .details-title { margin: 0; font-size: 1.1rem; line-height: 1.25; }
+        .close-btn {
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            width: auto;
+            color: #111827;
+            font-weight: 700;
+        }
+        .close-btn:hover {
+            background: #f3f4f6;
+            border-color: #cbd5e1;
+        }
+        .details-body {
+            padding: 14px 16px 18px;
+            overflow-y: auto;
+        }
+        .details-links a {
+            display: inline-block;
+            margin-right: 10px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+        .kv {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #444;
+            line-height: 1.45;
+        }
+        .reviews {
+            margin-top: 14px;
+        }
+        .review {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            background: #fafafa;
+        }
+        .review .meta {
+            font-size: 0.78rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .review .text {
+            font-size: 0.9rem;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        /* View Toggle (List vs Vibe Map) */
+        .view-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .view-toggle button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .view-toggle button:hover {
+            background: #f1f5f9;
+        }
+        .view-toggle button.active {
+            background: #2c3e50;
+            color: white;
+        }
+        .view-toggle button:first-child {
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        /* Vibe Map Container */
+        .vibe-map-container {
+            display: none;
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        .vibe-map-container.show {
+            display: flex;
+            flex-direction: column;
+        }
+        .vibe-map-chart-wrapper {
+            flex: 1;
+            min-height: 300px;
+            max-height: calc(100vh - 380px);
+            position: relative;
+        }
+        .vibe-map-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .vibe-map-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+        }
+        .vibe-map-header h4 {
+            margin: 0 0 6px 0;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+        .vibe-map-header p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        .vibe-map-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .vibe-map-legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Custom Lens Builder */
+        .custom-lens-builder {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 10px;
+            grid-column: span 2;
+        }
+        .custom-lens-builder.show { display: block; }
+        .custom-lens-builder h4 {
+            margin: 0 0 12px;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+        .signal-slider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .signal-slider label {
+            flex: 0 0 130px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #475569;
+        }
+        .signal-slider input[type="range"] {
+            flex: 1;
+            accent-color: #2c3e50;
+        }
+        .signal-slider .weight-value {
+            flex: 0 0 40px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: right;
+        }
+        .custom-lens-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .custom-lens-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .apply-custom-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+        }
+        .apply-custom-btn:hover { background: #34495e; }
+        .reset-custom-btn {
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #2c3e50;
+        }
+        .reset-custom-btn:hover { background: #f1f5f9; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content { flex-direction: column-reverse; }
+            .sidebar { width: 100%; height: 50%; }
+            #map { height: 50%; }
+        }
+    </style>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <!-- Chart.js for UMAP visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js zoom plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <h1>🕵️ Dive Bar Detective</h1>
+            <div class="byline">By Jeff Brines</div>
+        </div>
+        <div class="header-actions">
+            <button class="header-link" type="button" onclick="openAbout()">About</button>
+        </div>
+    </header>
+
+    <!-- About modal -->
+    <div id="aboutOverlay" class="modal-overlay" onclick="closeAbout()"></div>
+    <section id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" aria-hidden="true">
+        <div class="modal-header">
+            <div>
+                <h2 id="aboutTitle" class="modal-title">About Dive Bar Detective</h2>
+                <div class="meta" style="margin-top:4px;">A proof-of-concept data science exploration by Jeff Brines.</div>
+            </div>
+            <button class="close-btn" type="button" onclick="closeAbout()">Close</button>
+        </div>
+        <div class="modal-body">
+            <div style="font-weight:800; margin-bottom:6px;">What this is</div>
+            <div>
+                A <b>data-driven "Sommelier for Dive Bars"</b> that helps you find off-the-beaten-path spots in Denver.
+                We analyze <b>4,260+ reviews</b> using AI (GPT-5-nano) to extract what matters: food quality, vibe, authenticity, and local recommendations.
+            </div>
+
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">Two ways to explore</div>
+            <ul>
+                <li><b>📋 List</b>: Browse places sorted by your chosen lens. Click any card for details.</li>
+                <li><b>🎯 Vibe Map</b>: Scatter plot of Quality (X) vs Character (Y). Top-right = best finds! Scroll to zoom, shift+drag to pan.</li>
+            </ul>
+
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">What the lenses mean (0–10)</div>
+            <ul>
+                <li><b>Quality</b>: "Is it good?" — food/drink, recommendations, service, value.</li>
+                <li><b>Character</b>: "Has soul?" — authenticity, classic, unpretentious, dive-y.</li>
+                <li><b>Underrated</b>: "Better than Google says?" — our analysis vs stars.</li>
+                <li><b>Blended</b>: 40% Quality + 35% Character + 25% Underrated.</li>
+                <li><b>Custom</b>: Your own weights for all 9 signals.</li>
+            </ul>
+
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">Vibe Map quadrants</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.85rem;">
+                <div>🌟 <b>Top-Right</b>: Best Finds</div>
+                <div>🍺 <b>Top-Left</b>: Authentic Dives</div>
+                <div>✨ <b>Bottom-Right</b>: Polished</div>
+                <div>📍 <b>Bottom-Left</b>: Average</div>
+            </div>
+
+            <div style="margin-top:10px;" class="meta">
+                Dashed lines = median (splits places in half). Relative rankings — they’re designed to help you explore and decide faster.
+            </div>
+        </div>
+    </section>
+
+    <!-- Lens info modal -->
+    <div id="lensOverlay" class="modal-overlay" onclick="closeLensInfo()"></div>
+    <section id="lensModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="lensTitle" aria-hidden="true">
+        <div class="modal-header">
+            <div>
+                <h2 id="lensTitle" class="modal-title">Lens guide</h2>
+                <div class="meta" style="margin-top:4px;">How Quality, Character, Underrated, and Blended scores work.</div>
+            </div>
+            <button class="close-btn" type="button" onclick="closeLensInfo()">Close</button>
+        </div>
+        <div id="lensBody" class="modal-body"></div>
+    </section>
+
+    <div class="main-content">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="filters-container">
+                <div class="filters-toggle">
+                    <div style="font-weight:700; font-size:0.95rem; color:#2c3e50;">Filters</div>
+                    <button id="toggleAdvancedBtn" type="button" onclick="toggleAdvancedFilters()">More filters</button>
+                </div>
+                <div class="controls">
+                    <div class="control-group">
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <span>Lens</span>
+                            <button class="info-btn" type="button" title="What do these lenses mean?" onclick="openLensInfo()">i</button>
+                        </label>
+                        <select id="lens" onchange="onLensChange()">
+                            <option value="blended_0_10" selected>Blended</option>
+                            <option value="quality_0_10">Quality</option>
+                            <option value="character_0_10">Character</option>
+                            <option value="underrated_0_10">Underrated</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                    </div>
+                    <div class="control-group" style="grid-column: span 2;">
+                        <label>Minimum score</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input id="minLensScore" type="range" min="0" max="10" step="0.1" value="0"
+                                   style="flex:1; accent-color:#2c3e50;"
+                                   oninput="onMinScoreChanged()" />
+                            <div id="minLensScoreValue" style="min-width:48px; text-align:right; font-weight:800; color:#2c3e50;">0.0</div>
+                        </div>
+                    </div>
+                    <div class="control-group" style="grid-column: span 2;">
+                        <label>Type</label>
+                        <select id="typeFilter" title="Choose what kind of places to include">
+                            <option value="all" selected>All</option>
+                            <option value="bar">Bar</option>
+                            <option value="restaurant">Restaurant</option>
+                            <option value="both">Both (Bar + Restaurant)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Custom Lens Builder -->
+                    <div id="customLensBuilder" class="custom-lens-builder">
+                        <h4>🎛️ Build Your Custom Lens</h4>
+                        <div class="signal-slider">
+                            <label title="How good is the food/drinks?">Food & Drink</label>
+                            <input type="range" id="w_food_drink_quality" min="0" max="100" value="50" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">50%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Staff friendliness, attentiveness">Service</label>
+                            <input type="range" id="w_service_quality" min="0" max="100" value="30" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">30%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Bang for buck">Value</label>
+                            <input type="range" id="w_value_score" min="0" max="100" value="40" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">40%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Gritty dive bar energy">Divey Vibe</label>
+                            <input type="range" id="w_divey_score" min="0" max="100" value="20" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">20%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Long-running, neighborhood staple">Classic/Institution</label>
+                            <input type="range" id="w_classic_institution" min="0" max="100" value="30" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">30%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Laid-back, no pretense">Unpretentious</label>
+                            <input type="range" id="w_unpretentious" min="0" max="100" value="30" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">30%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Genuine character, not corporate">Authenticity</label>
+                            <input type="range" id="w_authenticity" min="0" max="100" value="40" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">40%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Would reviewer recommend?">Would Recommend</label>
+                            <input type="range" id="w_would_recommend" min="0" max="100" value="50" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">50%</span>
+                        </div>
+                        <div class="signal-slider">
+                            <label title="Unique, stands out">Memorable</label>
+                            <input type="range" id="w_memorable" min="0" max="100" value="30" oninput="updateWeightDisplay(this)">
+                            <span class="weight-value">30%</span>
+                        </div>
+                        <div class="custom-lens-actions">
+                            <button type="button" class="apply-custom-btn" onclick="applyCustomLens()">Apply Custom Lens</button>
+                            <button type="button" class="reset-custom-btn" onclick="resetCustomLens()">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div id="advancedFilters" class="advanced-filters">
+                        <div class="control-group">
+                            <label>Min Google Rating</label>
+                            <select id="minRating">
+                                <option value="3.0">3.0+</option>
+                                <option value="3.5" selected>3.5+</option>
+                                <option value="4.0">4.0+</option>
+                                <option value="4.5">4.5+</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Min Google Reviews</label>
+                            <select id="minReviews">
+                                <option value="0" selected>Any</option>
+                                <option value="20">20+</option>
+                                <option value="50">50+</option>
+                                <option value="100">100+</option>
+                                <option value="250">250+</option>
+                                <option value="500">500+</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="search-btn" onclick="fetchLocations()">Apply Filters</button>
+                    <div id="resultsCount" style="grid-column: span 2; font-size: 0.85rem; color:#555; margin-top:6px;">
+                        Showing 0 results
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Toggle -->
+            <div class="view-toggle" style="margin: 0 15px 10px 15px;">
+                <button id="listViewBtn" class="active" onclick="switchView('list')">📋 List</button>
+                <button id="vibeMapBtn" onclick="switchView('vibe')">🎯 Vibe Map</button>
+            </div>
+            
+            <div id="results" class="results-list">
+                <div class="loading">Locating targets...</div>
+            </div>
+            
+            <!-- Vibe Map (UMAP Scatter Plot) -->
+            <div id="vibeMapContainer" class="vibe-map-container">
+                <div class="vibe-map-header">
+                    <h4>🎯 Vibe Map — Quality vs Character</h4>
+                    <p>Dashed lines = median scores (splits places in half). <b>Top-right</b> = above average on both axes.
+                    Click dots for details. Scroll to zoom, shift+drag to pan.</p>
+                </div>
+                <div class="vibe-map-chart-wrapper">
+                    <canvas id="vibeMapChart"></canvas>
+                </div>
+                <div class="vibe-map-legend">
+                    <span><span class="legend-dot" style="background: #27ae60;"></span> Gem (8+)</span>
+                    <span><span class="legend-dot" style="background: #2980b9;"></span> Solid (6-8)</span>
+                    <span><span class="legend-dot" style="background: #95a5a6;"></span> Meh (&lt;6)</span>
+                    <span style="color: #cbd5e1;">|</span>
+                    <span>Scroll to zoom • Shift+drag to pan</span>
+                    <span style="color: #cbd5e1;">|</span>
+                    <button onclick="resetVibeMapZoom()" style="font-size: 0.7rem; padding: 2px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #f8fafc; cursor: pointer;">Reset Zoom</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div id="map"></div>
+    </div>
+
+    <!-- Details Panel -->
+    <div id="overlay" class="overlay" onclick="closeDetails()"></div>
+    <aside id="detailsPanel" class="details-panel" aria-hidden="true">
+        <div class="details-header">
+            <div>
+                <div id="detailsName" class="details-title">Loading…</div>
+                <div id="detailsAddress" class="meta"></div>
+                <div id="detailsBadges" class="badges"></div>
+            </div>
+            <button class="close-btn" onclick="closeDetails()">Close</button>
+        </div>
+        <div class="details-body">
+            <div id="detailsLinks" class="details-links"></div>
+            <div id="detailsStats" class="kv"></div>
+
+            <div class="reviews">
+                <h3 style="margin: 10px 0 0; font-size: 1rem;">Key reviews</h3>
+                <div id="detailsReviews" class="loading" style="margin-top: 10px;">Select a place…</div>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        let map;
+        let markers = [];
+        let markerByPlaceId = {};
+        let selectedPlace = null;
+        let lastLocations = [];
+        let lastLens = 'blended_0_10';
+        let cardByPlaceId = {};
+        let placeById = {};
+        let emptyStateMessage = null;
+        let lastTotalCount = null;
+
+        // Initialize Map
+        function initMap() {
+            // Default center (Denver)
+            map = L.map('map').setView([39.7392, -104.9903], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        async function fetchLocations() {
+            const lens = document.getElementById('lens').value;
+            const minRating = document.getElementById('minRating').value;
+            const minReviews = document.getElementById('minReviews').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const kinds = [];
+            let kindsMode = 'any';
+            if (typeFilter === 'bar') {
+                kinds.push('bar');
+            } else if (typeFilter === 'restaurant') {
+                kinds.push('restaurant');
+            } else if (typeFilter === 'both') {
+                kinds.push('bar');
+                kinds.push('restaurant');
+                kindsMode = 'all';
+            }
+            const container = document.getElementById('results');
+
+            container.innerHTML = '<div class="loading">Updating intel...</div>';
+
+            try {
+                const params = new URLSearchParams();
+                params.set('sort_by', lens);
+                params.set('min_rating', minRating);
+                params.set('min_reviews', minReviews);
+                if (kinds.length > 0) {
+                    params.set('kinds_mode', kindsMode);
+                    kinds.forEach(k => params.append('kinds', k));
+                }
+
+                const url = `http://localhost:8000/locations?${params.toString()}`;
+                const response = await fetch(url);
+                const locations = await response.json();
+                
+                const totalHeader = response.headers.get('X-Total-Count');
+                const totalNum = totalHeader ? parseInt(totalHeader, 10) : NaN;
+                lastTotalCount = Number.isFinite(totalNum) ? totalNum : null;
+
+                emptyStateMessage = null;
+                lastLocations = Array.isArray(locations) ? locations : [];
+                lastLens = lens;
+                renderLocations();
+
+            } catch (error) {
+                container.innerHTML = `<div style="text-align:center; color:red">Connection lost. Is backend running?</div>`;
+                console.error('Error:', error);
+            }
+        }
+
+        function getMinScore() {
+            const el = document.getElementById('minLensScore');
+            const v = parseFloat(el?.value ?? '0');
+            return Number.isFinite(v) ? v : 0;
+        }
+
+        function onMinScoreChanged() {
+            const v = getMinScore();
+            document.getElementById('minLensScoreValue').textContent = v.toFixed(1);
+            renderLocations();
+        }
+
+        function scrollToPlaceInList(placeId) {
+            const card = cardByPlaceId[placeId];
+            if (!card) return;
+
+            Object.values(cardByPlaceId).forEach(el => el?.classList?.remove('focused'));
+            card.classList.add('focused');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            window.setTimeout(() => card.classList.remove('focused'), 1600);
+        }
+
+        // Called from Leaflet popup HTML
+        window.jumpToPlace = function(placeId) {
+            const place = placeById[placeId];
+            if (!place) return false;
+            scrollToPlaceInList(placeId);
+            openDetails(place);
+            return false;
+        };
+
+        function renderLocations() {
+            const container = document.getElementById('results');
+            const countEl = document.getElementById('resultsCount');
+            const lens = document.getElementById('lens').value;
+            const minScore = getMinScore();
+
+            container.innerHTML = '';
+            clearMarkers();
+            markerByPlaceId = {};
+            cardByPlaceId = {};
+            placeById = {};
+
+            const filtered = (lastLocations || []).filter(p => {
+                if (minScore <= 0) return true;
+                const s = p && typeof p[lens] === 'number' ? p[lens] : null;
+                return (typeof s === 'number') && !Number.isNaN(s) && s >= minScore;
+            });
+
+            if (countEl) {
+                const total = (typeof lastTotalCount === 'number') ? lastTotalCount : (lastLocations || []).length;
+                if (total && total !== filtered.length) {
+                    countEl.textContent = `Showing ${filtered.length} of ${total} results`;
+                } else {
+                    countEl.textContent = `Showing ${filtered.length} result${filtered.length === 1 ? '' : 's'}`;
+                }
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="loading">${emptyStateMessage || 'No places found.'}</div>`;
+                map.setView([39.7392, -104.9903], 13);
+                return;
+            }
+
+            const bounds = L.latLngBounds();
+            filtered.forEach(place => {
+                const card = createCard(place, lens);
+                container.appendChild(card);
+                if (place?.place_id) {
+                    cardByPlaceId[place.place_id] = card;
+                    placeById[place.place_id] = place;
+                }
+
+                if (place.lat && place.lng) {
+                    const marker = L.marker([place.lat, place.lng])
+                        .addTo(map)
+                        .bindPopup(`
+                            <b>${place.name}</b><br>
+                            ${lensLabel(lens)}: ${formatScore(place[lens])}<br>
+                            <a href="#" onclick="return window.jumpToPlace(decodeURIComponent('${encodeURIComponent(place.place_id)}'))">View in list</a>
+                        `);
+
+                    markers.push(marker);
+                    markerByPlaceId[place.place_id] = marker;
+                    bounds.extend([place.lat, place.lng]);
+
+                    card.addEventListener('click', () => {
+                        map.flyTo([place.lat, place.lng], 16);
+                        marker.openPopup();
+                        openDetails(place);
+                    });
+                }
+            });
+
+            if (markers.length > 0) {
+                const sw = bounds.getSouthWest();
+                const ne = bounds.getNorthEast();
+                const latSpan = Math.abs(ne.lat - sw.lat);
+                const lngSpan = Math.abs(ne.lng - sw.lng);
+                if (latSpan < 0.35 && lngSpan < 0.35) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                } else {
+                    map.setView([39.7392, -104.9903], 13);
+                }
+            }
+
+            // Update vibe map if it's the active view
+            if (currentView === 'vibe') {
+                renderVibeMap();
+            }
+        }
+
+        function lensLabel(lens) {
+            if (lens === 'diveiness_0_10' || lens === 'character_0_10') return 'Character';
+            if (lens === 'underrated_0_10') return 'Underrated';
+            if (lens === 'quality_0_10') return 'Quality';
+            if (lens === 'custom') return 'Custom';
+            return 'Blended';
+        }
+
+        function formatScore(x) {
+            return (typeof x === 'number' && !Number.isNaN(x)) ? x.toFixed(1) : '?';
+        }
+
+        function createCard(place, lens) {
+            const card = document.createElement('div');
+            if (place?.place_id) card.dataset.placeId = place.place_id;
+            
+            let scoreClass = 'meh';
+            const s = (typeof place[lens] === 'number') ? place[lens] : place.blended_0_10;
+            if (typeof s === 'number') {
+                if (s >= 8.5) scoreClass = 'gem';
+                else if (s >= 7.0) scoreClass = 'solid';
+            }
+            
+            card.className = `card ${scoreClass}`;
+            
+            const priceStr = place.price_level ? '$'.repeat(place.price_level) : '?';
+            const types = place.types ? place.types.slice(0, 2).map(t => t.replace(/_/g, ' ')).join(', ') : 'Place';
+            
+            // Underrated score badge (0..10)
+            let underratedBadge = '';
+            if (typeof place.underrated_0_10 === 'number' && place.underrated_0_10 >= 7.0) {
+                underratedBadge = `<span class="badge ml" title="Model thinks this is underrated">📈 Underrated</span>`;
+            }
+
+            // Low-data badge (helps users avoid false signals)
+            let lowDataBadge = '';
+            if (
+                (typeof place.user_ratings_total === 'number' && place.user_ratings_total > 0 && place.user_ratings_total < 50) ||
+                (typeof place.review_count === 'number' && place.review_count > 0 && place.review_count < 15)
+            ) {
+                lowDataBadge = `<span class="badge" title="Low Google review count — treat this as a weak signal">⚠️ Low data</span>`;
+            }
+            
+            // Auto-tags from topic modeling
+            let autoTagsBadges = '';
+            if (Array.isArray(place.auto_tags) && place.auto_tags.length > 0) {
+                autoTagsBadges = place.auto_tags.slice(0, 3).map(tag => 
+                    `<span class="badge vibe" title="Auto-detected topic">${tag}</span>`
+                ).join('');
+            }
+            
+            // Unique badge from anomaly detection
+            let uniqueBadge = '';
+            if (typeof place.anomaly_score === 'number' && place.anomaly_score < -0.1) {
+                uniqueBadge = `<span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d;" title="Statistically unique — doesn't fit typical patterns">✨ Unique</span>`;
+            }
+            
+            card.innerHTML = `
+                <div class="info">
+                    <h2>${place.name}</h2>
+                    <div class="meta">
+                        ${place.address || ''}<br>
+                        <div class="badges">
+                            <span class="badge">★ ${place.rating} (${place.user_ratings_total})</span>
+                            ${lowDataBadge}
+                            ${underratedBadge}
+                            ${uniqueBadge}
+                            ${autoTagsBadges}
+                        </div>
+                    </div>
+                </div>
+                <div class="score-box">
+                    <span class="dive-score" title="${lensLabel(lens)} (0–10)">${formatScore(place[lens])}</span>
+                    <div class="score-sub">${lensLabel(lens)}</div>
+                    <span class="gem-label">${scoreClass === 'gem' ? 'Top pick' : (scoreClass === 'solid' ? 'Strong' : '')}</span>
+                </div>
+            `;
+            return card;
+        }
+
+        function openDetails(place) {
+            selectedPlace = place;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('detailsPanel').classList.add('show');
+            document.getElementById('detailsPanel').setAttribute('aria-hidden', 'false');
+
+            document.getElementById('detailsName').textContent = place.name || 'Unknown';
+            document.getElementById('detailsAddress').textContent = place.address || '';
+
+            const badgesHtml = `
+                <span class="badge">★ ${place.rating ?? '?'} (${place.user_ratings_total ?? '?'})</span>
+            `;
+            document.getElementById('detailsBadges').innerHTML = badgesHtml;
+
+            // Links
+            const googleMapsUrl = `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(place.place_id)}`;
+            let linksHtml = `<a href="${googleMapsUrl}" target="_blank" rel="noopener">Open in Google Maps</a>`;
+            if (place.website) {
+                linksHtml += `<a href="${place.website}" target="_blank" rel="noopener">Website</a>`;
+            }
+            document.getElementById('detailsLinks').innerHTML = linksHtml;
+
+            // Quick stats
+            const stats = [];
+            if (place.formatted_phone_number) stats.push(`Phone: ${place.formatted_phone_number}`);
+            if (typeof place.quality_0_10 === 'number') stats.push(`Quality: ${place.quality_0_10.toFixed(1)}/10`);
+            if (typeof place.character_0_10 === 'number') stats.push(`Character: ${place.character_0_10.toFixed(1)}/10`);
+            if (typeof place.underrated_0_10 === 'number') stats.push(`Underrated: ${place.underrated_0_10.toFixed(1)}/10`);
+            if (typeof place.blended_0_10 === 'number') stats.push(`Blended: ${place.blended_0_10.toFixed(1)}/10`);
+            if (typeof place.review_count === 'number') stats.push(`Reviews analyzed: ${place.review_count}`);
+            if (place.top_keywords && typeof place.top_keywords === 'object') {
+                const kws = Object.keys(place.top_keywords).slice(0, 6);
+                if (kws.length) stats.push(`Top keywords: ${kws.join(', ')}`);
+            }
+            document.getElementById('detailsStats').textContent = stats.join(' • ');
+
+            // Reviews
+            loadKeyReviews(place.place_id);
+        }
+
+        function closeDetails() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('detailsPanel').classList.remove('show');
+            document.getElementById('detailsPanel').setAttribute('aria-hidden', 'true');
+        }
+
+        async function loadKeyReviews(placeId) {
+            const box = document.getElementById('detailsReviews');
+            box.classList.remove('loading');
+            box.innerHTML = '<div class="loading">Loading reviews…</div>';
+            try {
+                const url = `http://localhost:8000/locations/${encodeURIComponent(placeId)}/reviews?limit=4`;
+                const res = await fetch(url);
+                const reviews = await res.json();
+                if (!Array.isArray(reviews) || reviews.length === 0) {
+                    box.innerHTML = '<div class="loading">No reviews available.</div>';
+                    return;
+                }
+                box.innerHTML = '';
+                reviews.forEach(r => {
+                    const el = document.createElement('div');
+                    el.className = 'review';
+                    const stars = r.rating ? `★ ${r.rating}` : '';
+                    const senti = (typeof r.openai_sentiment === 'number') ? `sent ${r.openai_sentiment.toFixed(2)}` : '';
+                    const dive = r.openai_is_dive_positive ? 'dive+' : '';
+                    const who = r.author_name ? `by ${r.author_name}` : '';
+                    el.innerHTML = `
+                        <div class="meta">${[stars, senti, dive, who].filter(Boolean).join(' • ')}</div>
+                        <div class="text">${(r.review_text || '').slice(0, 420)}${(r.review_text && r.review_text.length > 420) ? '…' : ''}</div>
+                    `;
+                    box.appendChild(el);
+                });
+            } catch (e) {
+                box.innerHTML = '<div class="loading" style="color:#b91c1c">Failed to load reviews.</div>';
+            }
+        }
+
+        function clearMarkers() {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+        }
+
+        function toggleAdvancedFilters() {
+            const box = document.getElementById('advancedFilters');
+            const btn = document.getElementById('toggleAdvancedBtn');
+            const isOpen = box.classList.toggle('show');
+            btn.textContent = isOpen ? 'Hide filters' : 'More filters';
+        }
+
+        function openAbout() {
+            document.getElementById('aboutOverlay').classList.add('show');
+            const modal = document.getElementById('aboutModal');
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeAbout() {
+            document.getElementById('aboutOverlay').classList.remove('show');
+            const modal = document.getElementById('aboutModal');
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function openLensInfo() {
+            const lens = document.getElementById('lens')?.value || 'blended_0_10';
+            const label = lensLabel(lens);
+            const body = document.getElementById('lensBody');
+            const highlight = (name) => (name === label ? `<span style="background:#eef2ff; border:1px solid #c7d2fe; padding:1px 6px; border-radius:999px; font-weight:800;">${name} (selected)</span>` : `<b>${name}</b>`);
+
+            if (body) {
+                body.innerHTML = `
+                    <div style="margin-bottom:10px;">You’re currently using: ${highlight(label)}.</div>
+                    <ul>
+                        <li>${highlight('Diveiness')}: “How dive-y does this place read?” Driven primarily by the fraction of reviews classified as <i>dive-positive</i>. High scores mean it’s among the most dive-y places in this dataset.</li>
+                        <li>${highlight('Underrated')}: “Is it better than expected?” Based on an ML residual (actual rating minus predicted rating). Scaled relative to the current candidate set so the most underrated places rise toward 10.</li>
+                        <li>${highlight('Blended')}: average of Diveiness and Underrated — the default when you want “great and dive-y” at the same time.</li>
+                    </ul>
+                    <div class="meta" style="margin-top:10px;">Tip: use the Minimum score slider to hide anything below your personal threshold.</div>
+                `;
+            }
+
+            document.getElementById('lensOverlay').classList.add('show');
+            const modal = document.getElementById('lensModal');
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeLensInfo() {
+            document.getElementById('lensOverlay').classList.remove('show');
+            const modal = document.getElementById('lensModal');
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAbout();
+                closeLensInfo();
+            }
+        });
+
+        // Custom Lens Functions
+        let isCustomLensActive = false;
+
+        function onLensChange() {
+            const lens = document.getElementById('lens').value;
+            const builder = document.getElementById('customLensBuilder');
+            
+            if (lens === 'custom') {
+                builder.classList.add('show');
+            } else {
+                builder.classList.remove('show');
+                isCustomLensActive = false;
+                fetchLocations();
+            }
+        }
+
+        function updateWeightDisplay(slider) {
+            const value = slider.value;
+            slider.nextElementSibling.textContent = value + '%';
+        }
+
+        function getCustomWeights() {
+            const weights = {};
+            const signals = [
+                'food_drink_quality', 'service_quality', 'value_score',
+                'divey_score', 'classic_institution', 'unpretentious',
+                'authenticity', 'would_recommend', 'memorable'
+            ];
+            
+            signals.forEach(sig => {
+                const el = document.getElementById('w_' + sig);
+                if (el) {
+                    const val = parseInt(el.value, 10) / 100;
+                    if (val > 0) weights[sig] = val;
+                }
+            });
+            
+            return weights;
+        }
+
+        async function applyCustomLens() {
+            const weights = getCustomWeights();
+            
+            if (Object.keys(weights).length === 0) {
+                alert('Please set at least one signal weight above 0%');
+                return;
+            }
+
+            isCustomLensActive = true;
+            const minRating = document.getElementById('minRating').value;
+            const minReviews = document.getElementById('minReviews').value;
+            const container = document.getElementById('results');
+            container.innerHTML = '<div class="loading">Applying custom lens...</div>';
+
+            try {
+                const params = new URLSearchParams();
+                params.set('weights', JSON.stringify(weights));
+                params.set('min_rating', minRating);
+                params.set('min_reviews', minReviews);
+
+                const url = `http://localhost:8000/locations/custom?${params.toString()}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Failed to apply custom lens');
+                }
+                
+                const locations = await response.json();
+                
+                const totalHeader = response.headers.get('X-Total-Count');
+                const totalNum = totalHeader ? parseInt(totalHeader, 10) : NaN;
+                lastTotalCount = Number.isFinite(totalNum) ? totalNum : null;
+
+                // Map custom_score to blended_0_10 for display
+                locations.forEach(loc => {
+                    loc.blended_0_10 = loc.custom_score;
+                });
+
+                emptyStateMessage = null;
+                lastLocations = Array.isArray(locations) ? locations : [];
+                lastLens = 'blended_0_10'; // Use blended for display purposes
+                renderLocations();
+
+            } catch (error) {
+                container.innerHTML = `<div style="text-align:center; color:red">${error.message}</div>`;
+                console.error('Error:', error);
+            }
+        }
+
+        function resetCustomLens() {
+            const signals = [
+                'food_drink_quality', 'service_quality', 'value_score',
+                'divey_score', 'classic_institution', 'unpretentious',
+                'authenticity', 'would_recommend', 'memorable'
+            ];
+            
+            const defaults = {
+                food_drink_quality: 50, service_quality: 30, value_score: 40,
+                divey_score: 20, classic_institution: 30, unpretentious: 30,
+                authenticity: 40, would_recommend: 50, memorable: 30
+            };
+            
+            signals.forEach(sig => {
+                const el = document.getElementById('w_' + sig);
+                if (el) {
+                    el.value = defaults[sig] || 50;
+                    updateWeightDisplay(el);
+                }
+            });
+        }
+
+        // View Toggle (List vs Vibe Map)
+        let currentView = 'list';
+        let vibeMapChart = null;
+
+        function switchView(view) {
+            currentView = view;
+            const listView = document.getElementById('results');
+            const vibeView = document.getElementById('vibeMapContainer');
+            const listBtn = document.getElementById('listViewBtn');
+            const vibeBtn = document.getElementById('vibeMapBtn');
+
+            if (view === 'list') {
+                listView.classList.add('results-list');
+                listView.style.display = '';
+                vibeView.classList.remove('show');
+                listBtn.classList.add('active');
+                vibeBtn.classList.remove('active');
+            } else {
+                listView.style.display = 'none';
+                vibeView.classList.add('show');
+                listBtn.classList.remove('active');
+                vibeBtn.classList.add('active');
+                renderVibeMap();
+            }
+        }
+
+        function renderVibeMap() {
+            const canvas = document.getElementById('vibeMapChart');
+            const ctx = canvas.getContext('2d');
+            const lens = document.getElementById('lens').value;
+            const minScore = getMinScore();
+
+            // Filter locations same as list view
+            const filtered = (lastLocations || []).filter(p => {
+                if (minScore <= 0) return true;
+                const s = p && typeof p[lens] === 'number' ? p[lens] : null;
+                return (typeof s === 'number') && !Number.isNaN(s) && s >= minScore;
+            });
+
+            // Use Quality (X) vs Character (Y) for meaningful axes
+            // Dynamic quadrants based on actual data distribution
+
+            // Get all quality and character scores
+            const qualities = filtered.map(p => typeof p.quality_0_10 === 'number' ? p.quality_0_10 : 5);
+            const characters = filtered.map(p => typeof p.character_0_10 === 'number' ? p.character_0_10 : 5);
+            const scores = filtered.map(p => p[lens] || p.blended_0_10 || 5);
+            
+            // Calculate medians for dynamic quadrant lines
+            const sortedQ = [...qualities].sort((a, b) => a - b);
+            const sortedC = [...characters].sort((a, b) => a - b);
+            const sortedScores = [...scores].sort((a, b) => a - b);
+            const medianQ = sortedQ[Math.floor(sortedQ.length / 2)] || 5;
+            const medianC = sortedC[Math.floor(sortedC.length / 2)] || 5;
+            
+            // Calculate data bounds with padding
+            const minQ = Math.min(...qualities) - 0.5;
+            const maxQ = Math.max(...qualities) + 0.5;
+            const minC = Math.min(...characters) - 0.5;
+            const maxC = Math.max(...characters) + 0.5;
+            
+            // Store for quadrant plugin
+            window.vibeMapMedians = { q: medianQ, c: medianC };
+            window.vibeMapBounds = { minQ, maxQ, minC, maxC };
+            
+            // Prepare data points with jitter to spread overlaps
+            const jitterAmount = 0.15;
+            const dataPoints = filtered.map((p, i) => {
+                const score = scores[i];
+                const quality = qualities[i];
+                const character = characters[i];
+                
+                // Add small jitter to spread overlapping points
+                const jitterX = (Math.random() - 0.5) * jitterAmount;
+                const jitterY = (Math.random() - 0.5) * jitterAmount;
+                
+                // Rank-based sizing (percentile within current set)
+                const rank = sortedScores.indexOf(score);
+                const percentile = filtered.length > 1 ? rank / (filtered.length - 1) : 0.5;
+                const bubbleSize = 4 + percentile * 8; // 4-12px range (smaller for less overlap)
+                
+                // Color by lens score
+                let color;
+                if (score >= 8) color = 'rgba(39, 174, 96, 0.7)';       // Green - gem
+                else if (score >= 6) color = 'rgba(41, 128, 185, 0.7)'; // Blue - solid
+                else color = 'rgba(149, 165, 166, 0.65)';               // Gray - meh
+
+                return {
+                    x: quality + jitterX,
+                    y: character + jitterY,
+                    r: bubbleSize,
+                    backgroundColor: color,
+                    borderColor: color.replace(/[\d.]+\)$/, '1)'),
+                    place: p,
+                    score: score
+                };
+            });
+
+            // Destroy existing chart
+            if (vibeMapChart) {
+                vibeMapChart.destroy();
+            }
+
+            // Quadrant label and divider plugin (uses dynamic medians)
+            const quadrantLabels = {
+                id: 'quadrantLabels',
+                beforeDatasetsDraw: (chart) => {
+                    const { ctx, chartArea: { left, right, top, bottom }, scales: { x, y } } = chart;
+                    const medians = window.vibeMapMedians || { q: 5, c: 5 };
+                    
+                    // Draw quadrant dividing lines at median values
+                    const midX = x.getPixelForValue(medians.q);
+                    const midY = y.getPixelForValue(medians.c);
+                    
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 4]);
+                    
+                    // Vertical line
+                    ctx.beginPath();
+                    ctx.moveTo(midX, top);
+                    ctx.lineTo(midX, bottom);
+                    ctx.stroke();
+                    
+                    // Horizontal line
+                    ctx.beginPath();
+                    ctx.moveTo(left, midY);
+                    ctx.lineTo(right, midY);
+                    ctx.stroke();
+                    
+                    ctx.restore();
+                },
+                afterDraw: (chart) => {
+                    const { ctx, chartArea: { left, right, top, bottom }, scales: { x, y } } = chart;
+                    const medians = window.vibeMapMedians || { q: 5, c: 5 };
+                    const midX = x.getPixelForValue(medians.q);
+                    const midY = y.getPixelForValue(medians.c);
+                    
+                    ctx.save();
+                    ctx.font = '10px system-ui, sans-serif';
+                    ctx.fillStyle = 'rgba(100, 116, 139, 0.6)';
+                    ctx.textAlign = 'center';
+                    
+                    // Top-right: Hidden Gems (above median on both)
+                    ctx.fillText('🌟 Best Finds', (midX + right) / 2, top + 15);
+                    // Top-left: Character over Quality
+                    ctx.fillText('🍺 Character', (left + midX) / 2, top + 15);
+                    // Bottom-right: Quality over Character
+                    ctx.fillText('✨ Quality', (midX + right) / 2, bottom - 8);
+                    // Bottom-left: Below median on both
+                    ctx.fillText('📍 Average', (left + midX) / 2, bottom - 8);
+                    
+                    ctx.restore();
+                }
+            };
+
+            // Create scatter chart
+            vibeMapChart = new Chart(ctx, {
+                type: 'bubble',
+                plugins: [quadrantLabels],
+                data: {
+                    datasets: [{
+                        label: 'Places',
+                        data: dataPoints,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        zoom: {
+                            zoom: {
+                                wheel: { enabled: true, modifierKey: null },
+                                pinch: { enabled: true },
+                                mode: 'xy'
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                                modifierKey: 'shift'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].raw.place.name;
+                                },
+                                label: function(context) {
+                                    const p = context.raw.place;
+                                    const q = p.quality_0_10 ? p.quality_0_10.toFixed(1) : '?';
+                                    const c = p.character_0_10 ? p.character_0_10.toFixed(1) : '?';
+                                    return `Quality: ${q} • Character: ${c}`;
+                                },
+                                afterLabel: function(context) {
+                                    const score = context.raw.score;
+                                    return `${lensLabel(lens)}: ${score.toFixed(1)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            min: window.vibeMapBounds?.minQ ?? 4,
+                            max: window.vibeMapBounds?.maxQ ?? 10,
+                            title: { display: true, text: '← Lower Quality    |    Higher Quality →', color: '#64748b', font: { size: 11, weight: '600' } },
+                            grid: { color: 'rgba(0,0,0,0.06)' },
+                            ticks: { display: true, color: '#94a3b8' }
+                        },
+                        y: {
+                            display: true,
+                            min: window.vibeMapBounds?.minC ?? 4,
+                            max: window.vibeMapBounds?.maxC ?? 10,
+                            title: { display: true, text: '← Less Character    |    More Character →', color: '#64748b', font: { size: 11, weight: '600' } },
+                            grid: { color: 'rgba(0,0,0,0.06)' },
+                            ticks: { display: true, color: '#94a3b8' }
+                        }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            const place = dataPoints[idx].place;
+                            openDetails(place);
+                            // Also highlight on map
+                            if (place.lat && place.lng) {
+                                map.flyTo([place.lat, place.lng], 16);
+                                const marker = markerByPlaceId[place.place_id];
+                                if (marker) marker.openPopup();
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Remove any existing notice (we now show status in axis labels)
+            const container = document.getElementById('vibeMapContainer');
+            const notice = container.querySelector('.umap-notice');
+            if (notice) notice.remove();
+        }
+
+        function resetVibeMapZoom() {
+            if (vibeMapChart) {
+                vibeMapChart.resetZoom();
+            }
+        }
+
+        // Boot up
+        initMap();
+        onMinScoreChanged();
+        fetchLocations();
+    </script>
+</body>
+</html>

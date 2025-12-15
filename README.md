@@ -4,13 +4,15 @@ By Jeff Brines.
 
 A data-driven "Sommelier for Dive Bars" that helps you find off-the-beaten-path spots using NLP, ML, and custom scoring lenses. Stop trusting inflated Google ratings — find places with real character.
 
+**Live Demo**: [GitHub Repository](https://github.com/JeffBrines/dive-bar-detective)
+
 ## What It Does
 
-- **Analyzes 4,260+ reviews** using GPT-5-nano to extract 9 quality/vibe signals
+- **Analyzes 4,260 reviews** using GPT-5-nano to extract 9 quality/vibe signals
 - **Scores places on 4 lenses**: Quality, Character, Underrated, Blended
 - **Custom lens builder**: Weight the 9 signals yourself to create your own scoring formula
 - **Vibe Map**: Interactive scatter plot showing Quality vs Character — find hidden gems in the top-right!
-- **ML-powered features**: UMAP visualization, auto-tagging, anomaly detection
+- **ML-ready features**: UMAP visualization, auto-tagging, anomaly detection
 
 ## Quick Start
 
@@ -18,6 +20,8 @@ A data-driven "Sommelier for Dive Bars" that helps you find off-the-beaten-path 
 
 ```bash
 # Clone and setup environment
+git clone https://github.com/JeffBrines/dive-bar-detective.git
+cd dive-bar-detective
 cp env.example .env  # Add your API keys
 python3 -m venv venv
 source venv/bin/activate
@@ -26,7 +30,7 @@ pip install -r requirements.txt
 
 Required API keys in `.env`:
 - `SUPABASE_URL` / `SUPABASE_KEY` — Database
-- `OPENAI_API_KEY` — NLP analysis
+- `OPENAI_API_KEY` — NLP analysis (if re-running)
 - `GOOGLE_MAPS_API_KEY` — Place data (optional, for new data collection)
 
 ### 2. Run the App
@@ -73,7 +77,11 @@ The **Vibe Map** plots every place on a Quality (X) vs Character (Y) scatter cha
 - Click any dot to see details
 - Reset Zoom button to restore view
 
-Dashed lines show the median scores, splitting places into four equal groups.
+**Features:**
+- Auto-scales axes to data bounds (no wasted space)
+- Dashed lines at median (splits places in half)
+- Slight jitter to spread overlapping points
+- Rank-based bubble sizing for visual variance
 
 ---
 
@@ -97,11 +105,11 @@ These are aggregated per location and used to compute the lens scores.
 
 ---
 
-## ML Features
+## ML Features (Ready to Run)
 
 | Feature | Script | Description |
 |---------|--------|-------------|
-| **UMAP Visualization** | `src/umap_viz.py` | Reduce 9 signals to 2D for "vibe map" scatter plot |
+| **UMAP Visualization** | `src/umap_viz.py` | Reduce 9 signals to 2D for "vibe space" clustering |
 | **Auto-Tagging** | `src/topic_modeling.py` | Extract topic labels from reviews (e.g., "late-night", "patio") |
 | **Anomaly Detection** | `src/anomaly_detection.py` | Find "truly unique" places using Isolation Forest |
 | **Vibe Clustering** | `src/vibe_clustering.py` | KMeans clustering for vibe_tag labels |
@@ -113,7 +121,7 @@ These are aggregated per location and used to compute the lens scores.
 ```
 1. Collect places     → src/collect_data.py (Google Places API)
 2. Fetch reviews      → src/fetch_reviews.py (Outscraper)
-3. NLP analysis       → src/hybrid_analysis.py (GPT-5-nano)
+3. NLP analysis       → src/hybrid_analysis.py (GPT-5-nano) ✅ COMPLETE
 4. Feature eng        → src/feature_engineering.py (aggregate signals)
 5. ML enrichment      → src/umap_viz.py, topic_modeling.py, anomaly_detection.py
 ```
@@ -121,11 +129,13 @@ These are aggregated per location and used to compute the lens scores.
 ### Run the full pipeline:
 
 ```bash
-# After collecting data, run NLP (takes ~3 hours for 4k reviews)
+# NLP analysis (already complete for 4,260 reviews)
 caffeinate -i python src/hybrid_analysis.py
 
-# Then aggregate and run ML
+# Aggregate signals to locations
 python src/feature_engineering.py
+
+# Generate ML features
 python src/umap_viz.py
 python src/topic_modeling.py --simple
 python src/anomaly_detection.py
@@ -165,6 +175,15 @@ python src/anomaly_detection.py
 - **NLP**: OpenAI GPT-5-nano
 - **ML**: scikit-learn, UMAP, BERTopic
 - **Frontend**: Vanilla HTML/JS, Leaflet.js, Chart.js
+
+---
+
+## Dataset
+
+- **251 locations** in Denver metro area
+- **4,260 reviews** analyzed with GPT-5-nano
+- **9 signals per review** → aggregated to location scores
+- **4 pre-built lenses** + custom lens builder
 
 ---
 

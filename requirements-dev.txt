@@ -1,0 +1,18 @@
+# Development/Data Processing requirements
+# Use this locally for running ML scripts
+
+googlemaps
+supabase
+pandas
+python-dotenv
+requests
+fastapi
+uvicorn[standard]
+gunicorn
+outscraper
+scikit-learn
+textblob
+umap-learn
+bertopic
+transformers
+openai

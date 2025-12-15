@@ -1,0 +1,16 @@
+# Production requirements - lightweight, API only
+# For data processing, use requirements.txt locally
+
+# Web Framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gunicorn==23.0.0
+
+# Database
+supabase==2.11.2
+
+# Environment
+python-dotenv==1.0.1
+
+# Utilities
+requests==2.32.3

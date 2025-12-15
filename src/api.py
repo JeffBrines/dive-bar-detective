@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from supabase import create_client, Client
 from pydantic import BaseModel, Field
 import os
@@ -12,13 +14,12 @@ load_dotenv()
 
 app = FastAPI(title="Dive Bar Detective API")
 
-# CORS Configuration - allows both local development and production
+# CORS Configuration - simplified for single-service deployment
 ALLOWED_ORIGINS = [
     "http://localhost:5500",  # Local development (python -m http.server)
-    "http://localhost:3000",  # Alternative local dev port
+    "http://localhost:8000",  # Local API serving static files
     "http://127.0.0.1:5500",
-    "http://127.0.0.1:3000",
-    "https://dive-bar-detective-frontend.onrender.com",  # Production frontend
+    "http://127.0.0.1:8000",
 ]
 
 # Allow additional origins from environment variable (comma-separated)
@@ -399,9 +400,21 @@ def enrich_place(place: dict, *, underrated_scale: float = 0.35) -> dict:
     place["blended_0_10"] = blended_0_10(place)  # Must come after character, quality, underrated
     return place
 
-@app.get("/")
-def read_root():
-    return {"message": "Dive Bar Detective API - Ready to find gems."}
+# Serve static files (frontend) from root directory
+# This allows single-service deployment
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+if os.path.exists(os.path.join(static_dir, "index.html")):
+    @app.get("/")
+    async def serve_frontend():
+        """Serve the main frontend HTML file"""
+        return FileResponse(os.path.join(static_dir, "index.html"))
+    
+    # Mount static assets (if you have a static folder in the future)
+    # app.mount("/static", StaticFiles(directory=os.path.join(static_dir, "static")), name="static")
+else:
+    @app.get("/")
+    def read_root():
+        return {"message": "Dive Bar Detective API - Ready to find gems."}
 
 @app.get("/locations", response_model=List[Location])
 def get_locations(

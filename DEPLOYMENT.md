@@ -52,17 +52,16 @@
 GitHub Repository
     ↓ (push triggers auto-deploy)
 Render Platform
-    ├── Backend Service (FastAPI)
-    │   ├── URL: dive-bar-detective-api.onrender.com
-    │   ├── Python 3.11
-    │   ├── Gunicorn + Uvicorn workers
-    │   └── Environment variables from dashboard
-    │
-    └── Frontend Static Site
-        ├── URL: dive-bar-detective-frontend.onrender.com
-        ├── Serves index.html + assets
-        └── Auto-detects API URL
+    └── Single Web Service (FastAPI + Static Files)
+        ├── URL: dive-bar-detective.onrender.com
+        ├── Python 3.11
+        ├── Gunicorn + Uvicorn workers
+        ├── Serves API endpoints (/locations, etc.)
+        ├── Serves frontend (index.html at /)
+        └── Environment variables from dashboard
 ```
+
+**Much simpler!** One service, one URL, no CORS complexity.
 
 ## Quick Deployment Steps
 
@@ -87,8 +86,8 @@ Render Platform
    - OUTSCRAPER_API_KEY (optional)
 
 4. **Access Your App**:
-   - Frontend: https://dive-bar-detective-frontend.onrender.com
-   - Backend: https://dive-bar-detective-api.onrender.com
+   - Single URL: https://dive-bar-detective.onrender.com
+   - API endpoints available at same URL (e.g., /locations)
 
 ## Key Features
 

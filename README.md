@@ -75,8 +75,7 @@ This app is configured for easy deployment to [Render](https://render.com) with 
    - Click "New" → "Blueprint"
    - Select your GitHub repository
    - Render will automatically read `render.yaml` and create:
-     - **Backend API**: FastAPI service at `https://dive-bar-detective-api.onrender.com`
-     - **Frontend**: Static site at `https://dive-bar-detective-frontend.onrender.com`
+     - **Single Web Service**: FastAPI backend serving static frontend at `https://dive-bar-detective.onrender.com`
 
 4. **Set Environment Variables** in Render Dashboard:
    
@@ -97,18 +96,13 @@ This app is configured for easy deployment to [Render](https://render.com) with 
 
 If you prefer manual setup:
 
-1. **Create Backend Web Service**:
+1. **Create Web Service**:
    - New → Web Service
    - Connect repository
+   - Name: `dive-bar-detective`
    - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn src.api:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT`
-   - Add environment variables
-
-2. **Create Frontend Static Site**:
-   - New → Static Site
-   - Connect repository
-   - Publish Directory: `.` (root)
-   - No build command needed
+   - Start Command: `gunicorn src.api:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120`
+   - Add environment variables (see step 4 above)
 
 ### Automatic Deployments
 
@@ -121,13 +115,13 @@ git push origin main
 # Render deploys automatically in 2-5 minutes
 ```
 
-### Production URLs
+### Production URL
 
 After deployment, your app will be available at:
-- **Frontend**: `https://dive-bar-detective-frontend.onrender.com`
-- **Backend API**: `https://dive-bar-detective-api.onrender.com`
+- **Single URL**: `https://dive-bar-detective.onrender.com`
+- API endpoints at same URL (e.g., `/locations`, `/vibes`)
 
-The frontend automatically detects the production API URL - no manual configuration needed!
+Much simpler - one service, one URL, no CORS complexity!
 
 ### Cost
 

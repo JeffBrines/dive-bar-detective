@@ -906,21 +906,11 @@
     <script>
         // API Configuration - automatically detects environment
         const API_BASE_URL = (() => {
-            // Check if we're on localhost
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Check if we're running via python -m http.server (separate frontend server)
+            if (window.location.port === '5500' || window.location.port === '3000') {
                 return 'http://localhost:8000';
             }
-            // Production: use environment variable injected by Render or construct from current host
-            // Render will inject API_URL as a build-time env var, or we can use a known production URL
-            // For now, we'll use a pattern: if frontend is on dive-bar-detective-frontend.onrender.com,
-            // backend is on dive-bar-detective-api.onrender.com
-            const frontendHost = window.location.hostname;
-            if (frontendHost.includes('onrender.com')) {
-                // Replace 'frontend' with 'api' in the hostname
-                const apiHost = frontendHost.replace('dive-bar-detective-frontend', 'dive-bar-detective-api');
-                return `https://${apiHost}`;
-            }
-            // Fallback: assume API is on same host with /api prefix (can be customized)
+            // Production or same-origin deployment: API is on same server
             return window.location.origin;
         })();
 

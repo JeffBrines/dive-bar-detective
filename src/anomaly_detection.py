@@ -74,6 +74,9 @@ def detect_anomalies(df: pd.DataFrame, contamination: float = 0.1) -> pd.DataFra
         n_jobs=-1
     )
     
+    # Fit the model
+    clf.fit(X)
+    
     # Get anomaly scores (decision_function returns raw scores)
     # More negative = more anomalous
     anomaly_scores = clf.decision_function(X)

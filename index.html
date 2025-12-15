@@ -610,17 +610,17 @@
                 </div>
                 <div class="controls">
                     <div class="control-group">
-                        <label style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                            <span>Lens</span>
+                        <label>Lens</label>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="lens" onchange="onLensChange()" style="flex:1;">
+                                <option value="blended_0_10" selected>Blended</option>
+                                <option value="quality_0_10">Quality</option>
+                                <option value="character_0_10">Character</option>
+                                <option value="underrated_0_10">Underrated</option>
+                                <option value="custom">Custom...</option>
+                            </select>
                             <button class="info-btn" type="button" title="What do these lenses mean?" onclick="openLensInfo()">i</button>
-                        </label>
-                        <select id="lens" onchange="onLensChange()">
-                            <option value="blended_0_10" selected>Blended</option>
-                            <option value="quality_0_10">Quality</option>
-                            <option value="character_0_10">Character</option>
-                            <option value="underrated_0_10">Underrated</option>
-                            <option value="custom">Custom...</option>
-                        </select>
+                        </div>
                     </div>
                     <div class="control-group" style="grid-column: span 2;">
                         <label>Minimum score</label>
@@ -1158,11 +1158,13 @@
                 body.innerHTML = `
                     <div style="margin-bottom:10px;">You’re currently using: ${highlight(label)}.</div>
                     <ul>
-                        <li>${highlight('Diveiness')}: “How dive-y does this place read?” Driven primarily by the fraction of reviews classified as <i>dive-positive</i>. High scores mean it’s among the most dive-y places in this dataset.</li>
-                        <li>${highlight('Underrated')}: “Is it better than expected?” Based on an ML residual (actual rating minus predicted rating). Scaled relative to the current candidate set so the most underrated places rise toward 10.</li>
-                        <li>${highlight('Blended')}: average of Diveiness and Underrated — the default when you want “great and dive-y” at the same time.</li>
+                        <li>${highlight('Quality')}: "Is it good?" — 35% food/drink quality + 30% recommendations + 15% service + 10% value + 10% memorable. Measures overall quality of experience.</li>
+                        <li>${highlight('Character')}: "Has soul?" — 30% authenticity + 25% classic/institution + 20% unpretentious + 15% divey + 10% memorable. Measures genuine character and vibe.</li>
+                        <li>${highlight('Underrated')}: "Better than Google says?" — 40% recommend-gap + 30% sentiment-gap + 30% discovery factor. Finds hidden gems undervalued by star ratings.</li>
+                        <li>${highlight('Blended')}: Best overall — 40% Quality + 35% Character + 25% Underrated. Balanced score for well-rounded places.</li>
+                        <li>${highlight('Custom')}: Build your own lens by adjusting the 9 signal sliders to weight what matters to you.</li>
                     </ul>
-                    <div class="meta" style="margin-top:10px;">Tip: use the Minimum score slider to hide anything below your personal threshold.</div>
+                    <div class="meta" style="margin-top:10px;">All scores are 0-10. Use the Minimum score slider to filter out low-scoring places.</div>
                 `;
             }
 

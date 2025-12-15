@@ -48,6 +48,132 @@ Open: http://localhost:5500
 
 ---
 
+## Deployment to Production
+
+This app is configured for easy deployment to [Render](https://render.com) with automatic CI/CD.
+
+### Prerequisites
+
+1. **GitHub Account**: Push your code to a GitHub repository
+2. **Render Account**: Sign up at [render.com](https://render.com) (free tier available)
+3. **API Keys Ready**: Have your production API keys ready (Supabase, OpenAI, etc.)
+
+### Deploy to Render
+
+#### Option 1: One-Click Deploy (Recommended)
+
+1. **Push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Create Render Account**: Sign up at render.com and connect your GitHub account
+
+3. **Deploy via Blueprint**:
+   - Click "New" → "Blueprint"
+   - Select your GitHub repository
+   - Render will automatically read `render.yaml` and create:
+     - **Backend API**: FastAPI service at `https://dive-bar-detective-api.onrender.com`
+     - **Frontend**: Static site at `https://dive-bar-detective-frontend.onrender.com`
+
+4. **Set Environment Variables** in Render Dashboard:
+   
+   Navigate to your backend service settings and add:
+   ```
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_KEY=your-supabase-anon-key
+   OPENAI_API_KEY=sk-your-openai-key
+   GOOGLE_MAPS_API_KEY=your-google-maps-key
+   OUTSCRAPER_API_KEY=your-outscraper-key (optional)
+   ```
+   
+   See `env.production.example` for the complete list.
+
+5. **Deploy**: Render will automatically build and deploy both services (takes 3-5 minutes)
+
+#### Option 2: Manual Service Creation
+
+If you prefer manual setup:
+
+1. **Create Backend Web Service**:
+   - New → Web Service
+   - Connect repository
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn src.api:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT`
+   - Add environment variables
+
+2. **Create Frontend Static Site**:
+   - New → Static Site
+   - Connect repository
+   - Publish Directory: `.` (root)
+   - No build command needed
+
+### Automatic Deployments
+
+Once connected to GitHub, Render automatically deploys when you push to your main branch:
+
+```bash
+git add .
+git commit -m "Update feature"
+git push origin main
+# Render deploys automatically in 2-5 minutes
+```
+
+### Production URLs
+
+After deployment, your app will be available at:
+- **Frontend**: `https://dive-bar-detective-frontend.onrender.com`
+- **Backend API**: `https://dive-bar-detective-api.onrender.com`
+
+The frontend automatically detects the production API URL - no manual configuration needed!
+
+### Cost
+
+- **Free Tier**: Backend + Frontend = $0/month
+  - Backend sleeps after 15 min inactivity (30s cold start)
+  - 750 hours/month (enough for moderate usage)
+  - Unlimited static site hosting
+
+- **Paid Tier**: $7/month for backend
+  - No sleep/downtime
+  - Better performance
+  - More resources
+
+### Monitoring
+
+Monitor your deployment in the Render Dashboard:
+- View real-time logs
+- Check deployment status
+- Monitor resource usage
+- Set up custom domains
+
+### Troubleshooting
+
+**Backend won't start?**
+- Check environment variables are set correctly
+- Review logs in Render Dashboard
+- Verify `requirements.txt` has all dependencies
+
+**Frontend can't connect to API?**
+- Check CORS settings in `src/api.py`
+- Verify backend is running (visit `/` endpoint)
+- Check browser console for errors
+
+**Cold starts too slow?**
+- Upgrade to paid tier ($7/month) for always-on backend
+- Or use a service like UptimeRobot to ping your API every 10 minutes
+
+### Custom Domain (Optional)
+
+To use your own domain:
+1. Add CNAME record pointing to Render URL
+2. Configure custom domain in Render Dashboard
+3. Render provides free SSL certificates
+
+---
+
 ## Scoring Lenses (0-10 scale)
 
 | Lens | What It Measures | Formula |

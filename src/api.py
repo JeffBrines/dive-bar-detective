@@ -12,9 +12,23 @@ load_dotenv()
 
 app = FastAPI(title="Dive Bar Detective API")
 
+# CORS Configuration - allows both local development and production
+ALLOWED_ORIGINS = [
+    "http://localhost:5500",  # Local development (python -m http.server)
+    "http://localhost:3000",  # Alternative local dev port
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:3000",
+    "https://dive-bar-detective-frontend.onrender.com",  # Production frontend
+]
+
+# Allow additional origins from environment variable (comma-separated)
+extra_origins = os.getenv("ALLOWED_ORIGINS", "")
+if extra_origins:
+    ALLOWED_ORIGINS.extend([origin.strip() for origin in extra_origins.split(",") if origin.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development; in production, set to your frontend domain
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -4,7 +4,8 @@ pandas
 python-dotenv
 requests
 fastapi
-uvicorn
+uvicorn[standard]
+gunicorn
 outscraper
 scikit-learn
 textblob

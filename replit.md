@@ -31,3 +31,11 @@ uvicorn src.api:app --host 0.0.0.0 --port 5000 --reload
 
 ## Deployment
 Configured for autoscale deployment using gunicorn with uvicorn workers.
+
+**Build uses `requirements-production.txt`** (~700MB) instead of `requirements.txt` (~5GB+).
+
+The production file excludes heavy ML packages (bertopic, transformers, scikit-learn, torch/CUDA) since the API only serves pre-computed data from Supabase. ML processing happens offline.
+
+## Development vs Production Dependencies
+- **requirements-production.txt** - Lightweight, for deployed web API
+- **requirements.txt** - Full ML stack, for local data processing scripts

@@ -37,3 +37,4 @@ externalPort = 80
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "src.api:app", "--workers", "2", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:5000", "--timeout", "120"]
+build = ["pip", "install", "-r", "requirements-production.txt"]

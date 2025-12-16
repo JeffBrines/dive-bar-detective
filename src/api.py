@@ -415,24 +415,43 @@ def enrich_place(place: dict, *, underrated_scale: float = 0.35) -> dict:
 
 # Serve static files (frontend) from root directory
 # This allows single-service deployment
-static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
-if os.path.exists(os.path.join(static_dir, "index.html")):
-    @app.get("/")
-    async def serve_frontend():
-        """Serve the main frontend HTML file"""
-        return FileResponse(os.path.join(static_dir, "index.html"))
-    
-    @app.get("/og-image.png")
-    async def serve_og_image():
-        """Serve Open Graph image for social sharing previews"""
-        og_path = os.path.join(static_dir, "og-image.png")
-        if os.path.exists(og_path):
-            return FileResponse(og_path, media_type="image/png")
-        raise HTTPException(status_code=404, detail="OG image not found")
-else:
-    @app.get("/")
-    def read_root():
-        return {"message": "Dive Bar Detective API - Ready to find gems."}
+# Try multiple paths to find the project root (handles different deployment environments)
+def find_project_root():
+    """Find the project root directory containing index.html"""
+    candidates = [
+        os.path.join(os.path.dirname(os.path.dirname(__file__))),  # Relative to api.py
+        os.getcwd(),  # Current working directory (Replit deployment)
+        "/home/runner/workspace",  # Replit default workspace
+    ]
+    for path in candidates:
+        if os.path.exists(os.path.join(path, "index.html")):
+            return path
+    return candidates[0]  # Fallback to first option
+
+static_dir = find_project_root()
+
+@app.get("/")
+async def serve_frontend():
+    """Serve the main frontend HTML file"""
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Dive Bar Detective API - Ready to find gems."}
+
+@app.get("/og-image.png")
+async def serve_og_image():
+    """Serve Open Graph image for social sharing previews"""
+    og_path = os.path.join(static_dir, "og-image.png")
+    if os.path.exists(og_path):
+        return FileResponse(
+            og_path, 
+            media_type="image/png",
+            headers={
+                "Cache-Control": "public, max-age=86400",  # Cache for 24 hours
+                "Content-Type": "image/png",
+            }
+        )
+    raise HTTPException(status_code=404, detail=f"OG image not found at {og_path}")
 
 @app.get("/locations", response_model=List[Location])
 def get_locations(

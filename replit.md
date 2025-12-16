@@ -37,5 +37,5 @@ Configured for autoscale deployment using gunicorn with uvicorn workers.
 The production file excludes heavy ML packages (bertopic, transformers, scikit-learn, torch/CUDA) since the API only serves pre-computed data from Supabase. ML processing happens offline.
 
 ## Development vs Production Dependencies
-- **requirements-production.txt** - Lightweight, for deployed web API
-- **requirements.txt** - Full ML stack, for local data processing scripts
+- **requirements-production.txt** - Lightweight, for deployed web API (~100MB)
+- **requirements-ml.txt** - Full ML stack, for local data processing scripts (renamed from requirements.txt to prevent auto-detection)

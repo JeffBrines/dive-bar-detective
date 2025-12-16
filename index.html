@@ -637,11 +637,14 @@
             border: 1px solid rgba(255,255,255,0.35);
             border-radius: 6px;
             color: #fff;
-            padding: 6px 10px;
-            font-size: 1rem;
+            padding: 0;
+            font-size: 1.1rem;
             cursor: pointer;
+            width: 40px;
+            height: 36px;
             min-width: 40px;
-            min-height: 36px;
+            max-width: 40px;
+            flex-shrink: 0;
         }
         .mobile-menu-btn:hover {
             border-color: rgba(255,255,255,0.7);
@@ -708,6 +711,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                width: 40px;
+                max-width: 40px;
             }
 
             /* Main layout - full screen views */
@@ -765,14 +770,18 @@
                 flex-shrink: 0;
             }
 
-            /* Filters toggle row */
+            /* Filters toggle row - compact on mobile */
             .filters-toggle {
-                margin-bottom: 8px;
+                margin-bottom: 6px;
+            }
+            .filters-toggle > div:first-child {
+                display: none; /* Hide "Filters" label on mobile */
             }
             .filters-toggle button {
-                padding: 6px 10px;
+                padding: 6px 12px;
                 font-size: 0.8rem;
                 min-height: 32px;
+                width: 100%;
             }
 
             /* Hide Lens and Type on mobile by default - show in More Filters */

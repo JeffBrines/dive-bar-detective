@@ -1,19 +1,18 @@
-# Production requirements - lightweight, API only
-# For data processing, use requirements-dev.txt locally
+# Production requirements - lightweight, API only (~700MB vs ~5GB+ with ML deps)
+# For data processing/ML, use requirements.txt locally
+#
+# This excludes: bertopic, transformers, scikit-learn, umap-learn, textblob, openai
+# Those packages pull in PyTorch/CUDA which are NOT needed for the web API
+# The API only serves pre-computed data from Supabase
 
 # Web Framework
-fastapi
-uvicorn[standard]
-gunicorn
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+gunicorn>=21.0.0
 
 # Database
-supabase
+supabase>=2.0.0
 
-# Environment
-python-dotenv
-
-# Utilities
-requests
-
-
-
+# Environment & Utils
+python-dotenv>=1.0.0
+requests>=2.31.0

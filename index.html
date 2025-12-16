@@ -45,11 +45,29 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
-            line-height: 1.1;
+            line-height: 1.2;
+        }
+        .tagline {
+            font-size: 0.82rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
         }
         .byline {
-            font-size: 0.85rem;
-            opacity: 0.85;
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        .byline a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .byline a:hover {
+            text-decoration: underline;
         }
         .header-actions {
             display: flex;
@@ -266,6 +284,27 @@
         .badge { background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; }
         .badge.ml { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .badge.vibe { background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        
+        .maps-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 8px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            color: #0369a1;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 6px;
+            transition: all 0.15s;
+        }
+        .maps-link:hover {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+            color: #0c4a6e;
+        }
         
         .score-box { text-align: center; min-width: 70px; }
         .dive-score { font-size: 2.2rem; font-weight: 900; display: block; letter-spacing: 0.02em; }
@@ -519,11 +558,387 @@
         }
         .reset-custom-btn:hover { background: #f1f5f9; }
 
-        /* Responsive */
+        /* ========================================
+           MOBILE RESPONSIVE STYLES
+           ======================================== */
+        
+        /* Mobile Bottom Tab Bar */
+        .mobile-tabs {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            z-index: 1500;
+            padding: 0;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        .mobile-tabs-inner {
+            display: flex;
+            justify-content: space-around;
+            align-items: stretch;
+        }
+        .mobile-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 8px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            min-height: 56px;
+        }
+        .mobile-tab:active {
+            background: #f1f5f9;
+        }
+        .mobile-tab.active {
+            color: #2c3e50;
+        }
+        .mobile-tab-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        .mobile-tab.active .mobile-tab-icon {
+            transform: scale(1.1);
+        }
+
+        /* Mobile Header Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 8px;
+            color: #fff;
+            padding: 10px 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .mobile-menu-btn:hover {
+            border-color: rgba(255,255,255,0.7);
+        }
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 56px;
+            right: 10px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1100;
+            min-width: 180px;
+            overflow: hidden;
+        }
+        .mobile-menu.show {
+            display: block;
+        }
+        .mobile-menu-item {
+            display: block;
+            width: 100%;
+            padding: 14px 16px;
+            background: transparent;
+            border: none;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #333;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .mobile-menu-item:last-child {
+            border-bottom: none;
+        }
+        .mobile-menu-item:active {
+            background: #f8fafc;
+        }
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1050;
+        }
+        .mobile-menu-overlay.show {
+            display: block;
+        }
+
+        /* Mobile Responsive Breakpoints */
         @media (max-width: 768px) {
-            .main-content { flex-direction: column-reverse; }
-            .sidebar { width: 100%; height: 50%; }
-            #map { height: 50%; }
+            /* Header compact mode */
+            header {
+                padding: 10px 12px;
+            }
+            h1 {
+                font-size: 1.15rem;
+            }
+            .tagline {
+                font-size: 0.72rem;
+            }
+            .header-right {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Main layout - full screen views */
+            .main-content {
+                flex-direction: column;
+                height: calc(100vh - 56px);
+                padding-bottom: 56px; /* Space for bottom tabs */
+            }
+            
+            /* Sidebar becomes full-screen */
+            .sidebar {
+                position: absolute;
+                top: 56px;
+                left: 0;
+                right: 0;
+                bottom: 56px;
+                width: 100%;
+                height: auto;
+                z-index: 100;
+                display: flex;
+                flex-direction: column;
+                border-right: none;
+            }
+            .sidebar.mobile-hidden {
+                display: none;
+            }
+            
+            /* Map becomes full-screen */
+            #map {
+                position: absolute;
+                top: 56px;
+                left: 0;
+                right: 0;
+                bottom: 56px;
+                height: auto;
+                z-index: 99;
+            }
+            #map.mobile-hidden {
+                display: none;
+            }
+
+            /* Bottom tabs visible */
+            .mobile-tabs {
+                display: block;
+            }
+
+            /* Filters container */
+            .filters-container {
+                padding: 12px;
+            }
+
+            /* Controls grid */
+            .controls {
+                gap: 8px;
+            }
+            .control-group {
+                gap: 3px;
+            }
+            
+            /* Search button */
+            .search-btn {
+                padding: 12px;
+                font-size: 0.95rem;
+                min-height: 44px;
+            }
+
+            /* Results list */
+            .results-list {
+                padding: 12px;
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            /* Cards mobile */
+            .card {
+                padding: 12px;
+                margin-bottom: 12px;
+                flex-direction: row;
+                gap: 10px;
+            }
+            .card .info {
+                flex: 1;
+                min-width: 0;
+            }
+            .card .info h2 {
+                font-size: 1rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .card .meta {
+                font-size: 0.8rem;
+            }
+            .card .score-box {
+                min-width: 60px;
+                flex-shrink: 0;
+            }
+            .card .dive-score {
+                font-size: 1.8rem;
+            }
+            .card .score-sub {
+                font-size: 0.68rem;
+            }
+            .card .gem-label {
+                font-size: 0.65rem;
+            }
+            .badges {
+                gap: 4px;
+            }
+            .badge {
+                font-size: 0.7rem;
+                padding: 2px 5px;
+            }
+
+            /* View toggle in sidebar */
+            .view-toggle {
+                margin: 0 12px 8px 12px;
+            }
+            .view-toggle button {
+                padding: 10px 12px;
+                min-height: 44px;
+            }
+
+            /* Vibe map mobile */
+            .vibe-map-container {
+                padding: 12px;
+            }
+            .vibe-map-header {
+                padding: 10px 12px;
+            }
+            .vibe-map-header h4 {
+                font-size: 0.9rem;
+            }
+            .vibe-map-header p {
+                font-size: 0.75rem;
+            }
+            .vibe-map-chart-wrapper {
+                max-height: calc(100vh - 340px);
+            }
+            .vibe-map-legend {
+                gap: 8px;
+                font-size: 0.7rem;
+                padding: 8px 0;
+                flex-wrap: wrap;
+            }
+
+            /* Custom lens builder mobile */
+            .custom-lens-builder {
+                padding: 12px;
+            }
+            .signal-slider {
+                gap: 8px;
+            }
+            .signal-slider label {
+                flex: 0 0 100px;
+                font-size: 0.72rem;
+            }
+            .signal-slider .weight-value {
+                flex: 0 0 35px;
+                font-size: 0.75rem;
+            }
+            .custom-lens-actions button {
+                min-height: 44px;
+            }
+
+            /* Details panel - full screen slide up */
+            .details-panel {
+                width: 100%;
+                height: 85vh;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                border-radius: 16px 16px 0 0;
+                transform: translateY(100%);
+            }
+            .details-panel.show {
+                transform: translateY(0);
+            }
+            .details-header {
+                padding: 16px;
+            }
+            .details-header::before {
+                content: '';
+                display: block;
+                width: 40px;
+                height: 4px;
+                background: #e2e8f0;
+                border-radius: 2px;
+                margin: 0 auto 12px;
+            }
+            .details-body {
+                padding: 0 16px 24px;
+                padding-bottom: calc(24px + env(safe-area-inset-bottom, 0));
+            }
+            .close-btn {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 8px 14px;
+            }
+
+            /* Modals mobile */
+            .modal {
+                top: 10px;
+                max-height: calc(100vh - 20px);
+                border-radius: 12px;
+            }
+            .modal-header {
+                padding: 12px 14px;
+            }
+            .modal-body {
+                padding: 12px 14px 16px;
+            }
+            .modal-body input[type="text"],
+            .modal-body input[type="email"] {
+                padding: 12px !important;
+                font-size: 16px !important; /* Prevents iOS zoom */
+            }
+            .modal-body button[type="submit"] {
+                min-height: 48px;
+            }
+
+            /* Info button bigger touch target */
+            .info-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            /* Filters toggle button */
+            .filters-toggle button {
+                min-height: 40px;
+                padding: 8px 12px;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 380px) {
+            h1 {
+                font-size: 1rem;
+            }
+            .card .info h2 {
+                font-size: 0.95rem;
+            }
+            .card .dive-score {
+                font-size: 1.6rem;
+            }
+            .signal-slider label {
+                flex: 0 0 85px;
+                font-size: 0.68rem;
+            }
         }
     </style>
     
@@ -541,14 +956,26 @@
     <header>
         <div class="header-left">
             <h1>🕵️ Dive Bar Detective</h1>
-            <div class="byline">By <a href="https://www.jeffbrines.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Jeff Brines</a></div>
+            <div class="tagline">Discover hidden gems the algorithms miss</div>
         </div>
-        <div class="header-actions">
-            <button class="header-link" type="button" onclick="openCityRequest()">Request Your City</button>
-            <button class="header-link" type="button" onclick="openDonation()">Support</button>
-            <button class="header-link" type="button" onclick="openAbout()">About</button>
+        <div class="header-right">
+            <div class="header-actions">
+                <button class="header-link" type="button" onclick="openCityRequest()">Request Your City</button>
+                <button class="header-link" type="button" onclick="openDonation()">Support</button>
+                <button class="header-link" type="button" onclick="openAbout()">About</button>
+            </div>
+            <div class="byline">by <a href="https://www.jeffbrines.com" target="_blank" rel="noopener">Jeff Brines</a></div>
         </div>
+        <button class="mobile-menu-btn" type="button" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
     </header>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobileMenuOverlay" class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+    <div id="mobileMenu" class="mobile-menu">
+        <button class="mobile-menu-item" type="button" onclick="openCityRequest(); closeMobileMenu();">📍 Request Your City</button>
+        <button class="mobile-menu-item" type="button" onclick="openDonation(); closeMobileMenu();">💜 Support</button>
+        <button class="mobile-menu-item" type="button" onclick="openAbout(); closeMobileMenu();">ℹ️ About</button>
+    </div>
 
     <!-- City Request modal -->
     <div id="cityRequestOverlay" class="modal-overlay" onclick="closeCityRequest()"></div>
@@ -667,35 +1094,52 @@
         <div class="modal-body">
             <div style="font-weight:800; margin-bottom:6px;">What this is</div>
             <div>
-                A <b>data-driven "Sommelier for Dive Bars"</b> that helps you find off-the-beaten-path spots in Denver.
-                We analyze <b>4,260+ reviews</b> using AI (GPT-5-nano) to extract what matters: food quality, vibe, authenticity, and local recommendations.
+                A <b>data-driven "Sommelier for Dive Bars"</b> that helps you find off-the-beaten-path spots in your town (or for now, Denver only).
+                We use ML, AI and NLP to analyze reviews and extract what matters (at least what matters to Jeff): food quality, vibe, authenticity, and local recommendations.
             </div>
 
-            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">Two ways to explore</div>
-            <ul>
-                <li><b>📋 List</b>: Browse places sorted by your chosen lens. Click any card for details.</li>
-                <li><b>🎯 Vibe Map</b>: Scatter plot of Quality (X) vs Character (Y). Top-right = best finds! Scroll to zoom, shift+drag to pan.</li>
-            </ul>
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">The dataset</div>
+            <div>
+                <b>251 locations</b> and <b>4,260+ reviews</b> from Denver bars and restaurants. Being this is a proof of concept, I didn't pull in all locations from Google's Places API, but rather selected a subset of locations that I thought would be interesting and would be a good fit for the project. Overall, I wanted to select a diverse set of locations that would be a good fit for the project. No chains, 
+                focused on neighborhood joints with real character. Each review is analyzed to extract 9 quality and vibe signals.</a>.
+            </div>
 
-            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">What the lenses mean (0–10)</div>
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">How scoring works</div>
+            <div>
+                Scores use <b>percentile-based ranking</b> within our dataset. A score of 9.5 means "top of our curated list" — 
+                not a perfect 10, but the best relative to other authentic Denver spots. This makes scores comparable across 
+                all lenses and helps you quickly identify standouts. And again, the dataset was already limited to only 251 locations, so the scores are not perfect, but they are a good starting point.
+            </div>
+
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">The lenses (0–10)</div>
             <ul>
                 <li><b>Quality</b>: "Is it good?" — food/drink, recommendations, service, value.</li>
                 <li><b>Character</b>: "Has soul?" — authenticity, classic, unpretentious, dive-y.</li>
-                <li><b>Underrated</b>: "Better than Google says?" — our analysis vs stars.</li>
+                <li><b>Underrated</b>: "Better than Google says?" — our analysis vs star ratings.</li>
                 <li><b>Blended</b>: 40% Quality + 35% Character + 25% Underrated.</li>
                 <li><b>Custom</b>: Your own weights for all 9 signals.</li>
             </ul>
 
-            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">Vibe Map quadrants</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.85rem;">
-                <div>🌟 <b>Top-Right</b>: Best Finds</div>
-                <div>🍺 <b>Top-Left</b>: Authentic Dives</div>
-                <div>✨ <b>Bottom-Right</b>: Polished</div>
-                <div>📍 <b>Bottom-Left</b>: Average</div>
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">Two ways to explore</div>
+            <ul>
+                <li><b>📋 List</b>: Browse places sorted by your chosen lens. Click any card for details.</li>
+                <li><b>🎯 Vibe Map</b>: Scatter plot of Quality (X) vs Character (Y). Top-right = best finds!</li>
+            </ul>
+
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">How the Vibe Map works</div>
+            <div>
+                The Vibe Map visualizes all 251 locations based on their Quality and Character scores. 
+                Dashed lines show the median — places in the top-right quadrant are above average on both axes.
+                Bubble size reflects the current lens score. Scroll to zoom, shift+drag to pan.
             </div>
 
-            <div style="margin-top:10px;" class="meta">
-                Dashed lines = median (splits places in half). Relative rankings — they’re designed to help you explore and decide faster.
+            <div style="font-weight:800; margin-top:12px; margin-bottom:6px;">Tech behind the scenes</div>
+            <div style="font-size:0.9rem; line-height:1.5;">
+                <b>NLP Pipeline:</b> LLM-based sentiment analysis and signal extraction from review text.<br>
+                <b>UMAP</b> (umap-learn): Dimensionality reduction for clustering similar places.<br>
+                <b>scikit-learn:</b> K-Means clustering for vibe tags, Isolation Forest for "Unique" badge detection.<br>
+                <b>BERTopic:</b> Auto-tag extraction (e.g., "late-night", "craft-beer") from review topics.<br>
+                <b>Transformers:</b> RoBERTa-based sentiment scoring as a secondary signal.
             </div>
         </div>
     </section>
@@ -717,14 +1161,6 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="filters-container">
-                <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
-                    <div style="font-size: 0.85rem; color: #92400e; line-height: 1.4; text-align: center;">
-                        <strong>City of Denver (proper)</strong> is only supported at the moment
-                    </div>
-                    <div style="text-align: center; margin-top: 6px;">
-                        <a href="#" onclick="openCityRequest(); return false;" style="color: #2c3e50; font-size: 0.85rem; font-weight: 600; text-decoration: underline;">Request your city</a>
-                    </div>
-                </div>
                 <div class="filters-toggle">
                     <div style="font-weight:700; font-size:0.95rem; color:#2c3e50;">Filters</div>
                     <button id="toggleAdvancedBtn" type="button" onclick="toggleAdvancedFilters()">More filters</button>
@@ -842,6 +1278,9 @@
                     <div id="resultsCount" style="grid-column: span 2; font-size: 0.85rem; color:#555; margin-top:6px;">
                         Showing 0 results
                     </div>
+                    <div style="grid-column: span 2; font-size: 0.75rem; color:#94a3b8; margin-top:2px;">
+                        Denver only · <a href="#" onclick="openCityRequest(); return false;" style="color:#64748b; text-decoration:underline;">Add your city</a>
+                    </div>
                 </div>
             </div>
             
@@ -880,6 +1319,20 @@
         <!-- Map -->
         <div id="map"></div>
     </div>
+
+    <!-- Mobile Bottom Tabs -->
+    <nav class="mobile-tabs" role="tablist">
+        <div class="mobile-tabs-inner">
+            <button class="mobile-tab active" id="mobileListTab" onclick="switchMobileTab('list')" role="tab" aria-selected="true">
+                <span class="mobile-tab-icon">📋</span>
+                <span>List</span>
+            </button>
+            <button class="mobile-tab" id="mobileMapTab" onclick="switchMobileTab('map')" role="tab" aria-selected="false">
+                <span class="mobile-tab-icon">🗺️</span>
+                <span>Map</span>
+            </button>
+        </div>
+    </nav>
 
     <!-- Details Panel -->
     <div id="overlay" class="overlay" onclick="closeDetails()"></div>
@@ -1012,6 +1465,10 @@
         window.jumpToPlace = function(placeId) {
             const place = placeById[placeId];
             if (!place) return false;
+            // On mobile, switch to list tab first
+            if (window.innerWidth <= 768) {
+                switchMobileTab('list');
+            }
             scrollToPlaceInList(placeId);
             openDetails(place);
             return false;
@@ -1073,6 +1530,10 @@
                     bounds.extend([place.lat, place.lng]);
 
                     card.addEventListener('click', () => {
+                        // On mobile, switch to map tab first
+                        if (window.innerWidth <= 768) {
+                            switchMobileTab('map');
+                        }
                         map.flyTo([place.lat, place.lng], 16);
                         marker.openPopup();
                         openDetails(place);
@@ -1132,15 +1593,6 @@
                 underratedBadge = `<span class="badge ml" title="Model thinks this is underrated">📈 Underrated</span>`;
             }
 
-            // Low-data badge (helps users avoid false signals)
-            let lowDataBadge = '';
-            if (
-                (typeof place.user_ratings_total === 'number' && place.user_ratings_total > 0 && place.user_ratings_total < 50) ||
-                (typeof place.review_count === 'number' && place.review_count > 0 && place.review_count < 15)
-            ) {
-                lowDataBadge = `<span class="badge" title="Low Google review count — treat this as a weak signal">⚠️ Low data</span>`;
-            }
-            
             // Auto-tags from topic modeling
             let autoTagsBadges = '';
             if (Array.isArray(place.auto_tags) && place.auto_tags.length > 0) {
@@ -1155,6 +1607,9 @@
                 uniqueBadge = `<span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d;" title="Statistically unique — doesn't fit typical patterns">✨ Unique</span>`;
             }
             
+            // Google Maps link
+            const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(place.place_id)}`;
+            
             card.innerHTML = `
                 <div class="info">
                     <h2>${place.name}</h2>
@@ -1162,7 +1617,7 @@
                         ${place.address || ''}<br>
                         <div class="badges">
                             <span class="badge">★ ${place.rating} (${place.user_ratings_total})</span>
-                            ${lowDataBadge}
+                            <a href="${mapsUrl}" target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation();" title="Open in Google Maps">📍 Maps</a>
                             ${underratedBadge}
                             ${uniqueBadge}
                             ${autoTagsBadges}
@@ -1354,6 +1809,10 @@
             if (body) {
                 body.innerHTML = `
                     <div style="margin-bottom:10px;">You’re currently using: ${highlight(label)}.</div>
+                    <div style="margin-bottom:12px; padding:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:0.9rem;">
+                        <b>Percentile-based scoring:</b> All scores are relative rankings within our curated dataset of 251 Denver spots. 
+                        A 9.5 means "top of our list" — not perfect, but the best among authentic local places.
+                    </div>
                     <ul>
                         <li>${highlight('Quality')}: "Is it good?" — 35% food/drink quality + 30% recommendations + 15% service + 10% value + 10% memorable. Measures overall quality of experience.</li>
                         <li>${highlight('Character')}: "Has soul?" — 30% authenticity + 25% classic/institution + 20% unpretentious + 15% divey + 10% memorable. Measures genuine character and vibe.</li>
@@ -1361,7 +1820,7 @@
                         <li>${highlight('Blended')}: Best overall — 40% Quality + 35% Character + 25% Underrated. Balanced score for well-rounded places.</li>
                         <li>${highlight('Custom')}: Build your own lens by adjusting the 9 signal sliders to weight what matters to you.</li>
                     </ul>
-                    <div class="meta" style="margin-top:10px;">All scores are 0-10. Use the Minimum score slider to filter out low-scoring places.</div>
+                    <div class="meta" style="margin-top:10px;">Scores range from ~2 to ~9.5. Use the Minimum score slider to filter out lower-ranked places.</div>
                 `;
             }
 
@@ -1384,6 +1843,8 @@
                 closeDonation();
                 closeAbout();
                 closeLensInfo();
+                closeMobileMenu();
+                closeDetails();
             }
         });
 
@@ -1747,10 +2208,79 @@
             }
         }
 
+        // Mobile Menu Functions
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            const isOpen = menu.classList.toggle('show');
+            overlay.classList.toggle('show', isOpen);
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('show');
+            document.getElementById('mobileMenuOverlay').classList.remove('show');
+        }
+
+        // Mobile Tab Switching (List/Map)
+        let currentMobileTab = 'list';
+
+        function switchMobileTab(tab) {
+            currentMobileTab = tab;
+            const sidebar = document.querySelector('.sidebar');
+            const mapEl = document.getElementById('map');
+            const listTab = document.getElementById('mobileListTab');
+            const mapTab = document.getElementById('mobileMapTab');
+
+            if (tab === 'list') {
+                sidebar.classList.remove('mobile-hidden');
+                mapEl.classList.add('mobile-hidden');
+                listTab.classList.add('active');
+                listTab.setAttribute('aria-selected', 'true');
+                mapTab.classList.remove('active');
+                mapTab.setAttribute('aria-selected', 'false');
+            } else {
+                sidebar.classList.add('mobile-hidden');
+                mapEl.classList.remove('mobile-hidden');
+                listTab.classList.remove('active');
+                listTab.setAttribute('aria-selected', 'false');
+                mapTab.classList.add('active');
+                mapTab.setAttribute('aria-selected', 'true');
+                // Invalidate map size when shown (fixes rendering issues)
+                setTimeout(() => map.invalidateSize(), 100);
+            }
+        }
+
+        // Handle window resize - reset mobile state when going to desktop
+        function handleResize() {
+            const isMobile = window.innerWidth <= 768;
+            const sidebar = document.querySelector('.sidebar');
+            const mapEl = document.getElementById('map');
+            
+            if (!isMobile) {
+                // Desktop: ensure both are visible
+                sidebar.classList.remove('mobile-hidden');
+                mapEl.classList.remove('mobile-hidden');
+                closeMobileMenu();
+            } else {
+                // Mobile: apply current tab state
+                switchMobileTab(currentMobileTab);
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Initialize mobile state on page load
+        function initMobileState() {
+            if (window.innerWidth <= 768) {
+                switchMobileTab('list');
+            }
+        }
+
         // Boot up
         initMap();
         onMinScoreChanged();
         fetchLocations();
+        initMobileState();
     </script>
 </body>
 </html>

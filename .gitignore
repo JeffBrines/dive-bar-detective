@@ -6,6 +6,8 @@ venv/
 .venv/
 .env
 *.egg-info/
+.pythonlibs/
+.upm/
 
 # IDE
 .idea/

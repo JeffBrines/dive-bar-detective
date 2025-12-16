@@ -14,22 +14,10 @@ load_dotenv()
 
 app = FastAPI(title="Dive Bar Detective API")
 
-# CORS Configuration - simplified for single-service deployment
-ALLOWED_ORIGINS = [
-    "http://localhost:5500",  # Local development (python -m http.server)
-    "http://localhost:8000",  # Local API serving static files
-    "http://127.0.0.1:5500",
-    "http://127.0.0.1:8000",
-]
-
-# Allow additional origins from environment variable (comma-separated)
-extra_origins = os.getenv("ALLOWED_ORIGINS", "")
-if extra_origins:
-    ALLOWED_ORIGINS.extend([origin.strip() for origin in extra_origins.split(",") if origin.strip()])
-
+# CORS Configuration - allow all origins for Replit proxy
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,10 +28,15 @@ app.add_middleware(
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise RuntimeError("Supabase credentials not found in environment variables.")
+supabase: Optional[Client] = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+def get_supabase() -> Client:
+    """Get Supabase client, raising an error if not configured."""
+    if supabase is None:
+        raise HTTPException(status_code=503, detail="Supabase credentials not configured. Please set SUPABASE_URL and SUPABASE_KEY.")
+    return supabase
 
 class Location(BaseModel):
     place_id: str
@@ -134,6 +127,26 @@ def _percentile_sorted(sorted_vals: List[float], pct: float) -> float:
         return float(sorted_vals[lo])
     w = idx - lo
     return float(sorted_vals[lo]) * (1.0 - w) + float(sorted_vals[hi]) * w
+
+
+def normalize_to_percentile(places: List[dict], field: str, target_min: float = 2.0, target_max: float = 9.5) -> None:
+    """
+    Normalize a score field to percentile-based ranking within the dataset.
+    Top place gets target_max, bottom gets target_min.
+    This ensures all lenses have the same score distribution.
+    """
+    values = [(i, p.get(field)) for i, p in enumerate(places)]
+    values = [(i, v) for i, v in values if isinstance(v, (int, float)) and not math.isnan(v)]
+    
+    if len(values) < 2:
+        return
+    
+    values.sort(key=lambda x: x[1])
+    n = len(values)
+    for rank, (idx, _) in enumerate(values):
+        percentile = rank / (n - 1)
+        new_score = target_min + percentile * (target_max - target_min)
+        places[idx][field] = round(new_score, 1)
 
 def character_0_10(place: dict) -> Optional[float]:
     """
@@ -443,7 +456,8 @@ def get_locations(
     limit: int = Query(120, ge=1, le=500, description="Max results returned"),
 ):
     try:
-        query = supabase.table("locations").select("*").gte("rating", min_rating)
+        db = get_supabase()
+        query = db.table("locations").select("*").gte("rating", min_rating)
         
         # If max_price is specified and less than 4, filter
         # Note: we need to handle null prices (include them or exclude? Let's include them in general fetch but the UI can filter)
@@ -471,6 +485,15 @@ def get_locations(
 
         # Process and enrich
         enriched_results = [enrich_place(place, underrated_scale=underrated_scale) for place in results]
+        
+        # Normalize each lens to percentiles so all top out ~9.5
+        normalize_to_percentile(enriched_results, "quality_0_10")
+        normalize_to_percentile(enriched_results, "character_0_10")
+        normalize_to_percentile(enriched_results, "underrated_0_10")
+        
+        # Recalculate blended after normalization
+        for place in enriched_results:
+            place["blended_0_10"] = blended_0_10(place)
         
         # Filter by min Google review count (in memory to handle nulls)
         if min_reviews and min_reviews > 0:
@@ -521,12 +544,24 @@ def get_vibes(
     limit: int = Query(100, ge=1, le=500),
 ):
     try:
-        q = supabase.table("locations").select("*")
+        db = get_supabase()
+        q = db.table("locations").select("*")
         if vibe_tag:
             q = q.eq("vibe_tag", vibe_tag)
         resp = q.limit(limit).execute()
         # Enrich with computed scores
-        return [enrich_place(p) for p in resp.data]
+        enriched_results = [enrich_place(p) for p in resp.data]
+        
+        # Normalize each lens to percentiles so all top out ~9.5
+        normalize_to_percentile(enriched_results, "quality_0_10")
+        normalize_to_percentile(enriched_results, "character_0_10")
+        normalize_to_percentile(enriched_results, "underrated_0_10")
+        
+        # Recalculate blended after normalization
+        for place in enriched_results:
+            place["blended_0_10"] = blended_0_10(place)
+        
+        return enriched_results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -578,12 +613,22 @@ def get_locations_custom(
         raise HTTPException(status_code=400, detail="No valid signal weights provided")
     
     try:
-        query = supabase.table("locations").select("*").gte("rating", min_rating)
+        db = get_supabase()
+        query = db.table("locations").select("*").gte("rating", min_rating)
         sb_resp = query.execute()
         results = sb_resp.data
         
         # Enrich with standard scores first
         enriched_results = [enrich_place(place) for place in results]
+        
+        # Normalize each lens to percentiles so all top out ~9.5
+        normalize_to_percentile(enriched_results, "quality_0_10")
+        normalize_to_percentile(enriched_results, "character_0_10")
+        normalize_to_percentile(enriched_results, "underrated_0_10")
+        
+        # Recalculate blended after normalization
+        for place in enriched_results:
+            place["blended_0_10"] = blended_0_10(place)
         
         # Filter by min reviews
         if min_reviews and min_reviews > 0:
@@ -632,8 +677,9 @@ def get_key_reviews(place_id: str, limit: int = Query(3, ge=1, le=8)):
     - most 'dive-positive' (if present)
     """
     try:
+        db = get_supabase()
         resp = (
-            supabase.table("reviews")
+            db.table("reviews")
             .select("id,rating,review_text,author_name,openai_sentiment,openai_is_dive_positive")
             .eq("place_id", place_id)
             .execute()

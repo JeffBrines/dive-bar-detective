@@ -60,7 +60,7 @@ Render Platform
         ├── Serves frontend (index.html at /)
         └── Environment variables from dashboard
 ```
-
+trest
 **Much simpler!** One service, one URL, no CORS complexity.
 
 ## Quick Deployment Steps
@@ -117,6 +117,7 @@ For issues or questions:
 - Check Render logs in dashboard
 - Review troubleshooting section in README.md
 - Verify environment variables are set correctly
+
 
 
 

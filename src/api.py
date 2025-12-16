@@ -422,8 +422,13 @@ if os.path.exists(os.path.join(static_dir, "index.html")):
         """Serve the main frontend HTML file"""
         return FileResponse(os.path.join(static_dir, "index.html"))
     
-    # Mount static assets (if you have a static folder in the future)
-    # app.mount("/static", StaticFiles(directory=os.path.join(static_dir, "static")), name="static")
+    @app.get("/og-image.png")
+    async def serve_og_image():
+        """Serve Open Graph image for social sharing previews"""
+        og_path = os.path.join(static_dir, "og-image.png")
+        if os.path.exists(og_path):
+            return FileResponse(og_path, media_type="image/png")
+        raise HTTPException(status_code=404, detail="OG image not found")
 else:
     @app.get("/")
     def read_root():

@@ -606,15 +606,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 12px 8px;
+            padding: 8px 4px;
             background: transparent;
             border: none;
             color: #64748b;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s;
-            min-height: 56px;
+            min-height: 52px;
         }
         .mobile-tab:active {
             background: #f1f5f9;
@@ -623,8 +623,8 @@
             color: #2c3e50;
         }
         .mobile-tab-icon {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
+            font-size: 1.25rem;
+            margin-bottom: 2px;
         }
         .mobile-tab.active .mobile-tab-icon {
             transform: scale(1.1);
@@ -635,13 +635,13 @@
             display: none;
             background: transparent;
             border: 1px solid rgba(255,255,255,0.35);
-            border-radius: 8px;
+            border-radius: 6px;
             color: #fff;
-            padding: 10px 12px;
-            font-size: 1.2rem;
+            padding: 6px 10px;
+            font-size: 1rem;
             cursor: pointer;
-            min-width: 44px;
-            min-height: 44px;
+            min-width: 40px;
+            min-height: 36px;
         }
         .mobile-menu-btn:hover {
             border-color: rgba(255,255,255,0.7);
@@ -649,7 +649,7 @@
         .mobile-menu {
             display: none;
             position: fixed;
-            top: 56px;
+            top: 50px;
             right: 10px;
             background: #fff;
             border-radius: 10px;
@@ -693,13 +693,13 @@
         @media (max-width: 768px) {
             /* Header compact mode */
             header {
-                padding: 10px 12px;
+                padding: 8px 12px;
             }
             h1 {
-                font-size: 1.15rem;
+                font-size: 1.1rem;
             }
             .tagline {
-                font-size: 0.72rem;
+                font-size: 0.7rem;
             }
             .header-right {
                 display: none;
@@ -713,17 +713,17 @@
             /* Main layout - full screen views */
             .main-content {
                 flex-direction: column;
-                height: calc(100vh - 56px);
-                padding-bottom: 56px; /* Space for bottom tabs */
+                height: calc(100vh - 50px);
+                padding-bottom: 52px; /* Space for bottom tabs */
             }
             
             /* Sidebar becomes full-screen */
             .sidebar {
                 position: absolute;
-                top: 56px;
+                top: 50px;
                 left: 0;
                 right: 0;
-                bottom: 56px;
+                bottom: 52px;
                 width: 100%;
                 height: auto;
                 z-index: 100;
@@ -738,10 +738,10 @@
             /* Map becomes full-screen */
             #map {
                 position: absolute;
-                top: 56px;
+                top: 50px;
                 left: 0;
                 right: 0;
-                bottom: 56px;
+                bottom: 52px;
                 height: auto;
                 z-index: 99;
             }
@@ -754,123 +754,183 @@
                 display: block;
             }
 
-            /* Filters container */
-            .filters-container {
-                padding: 12px;
+            /* Hide List/Vibe toggle on mobile - use bottom nav instead */
+            .view-toggle {
+                display: none !important;
             }
 
-            /* Controls grid */
+            /* Filters container - more compact */
+            .filters-container {
+                padding: 10px 12px;
+                flex-shrink: 0;
+            }
+
+            /* Filters toggle row */
+            .filters-toggle {
+                margin-bottom: 8px;
+            }
+            .filters-toggle button {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                min-height: 32px;
+            }
+
+            /* Hide Lens and Type on mobile by default - show in More Filters */
+            .control-group.mobile-advanced {
+                display: none;
+            }
+            .advanced-filters.show .control-group.mobile-advanced {
+                display: flex;
+            }
+            /* Show Lens/Type in advanced filters on mobile */
+            .advanced-filters .mobile-show {
+                display: flex !important;
+            }
+
+            /* Controls grid - single column on mobile for compactness */
             .controls {
-                gap: 8px;
+                gap: 6px;
             }
             .control-group {
-                gap: 3px;
+                gap: 2px;
+            }
+            
+            /* Labels smaller */
+            .controls label {
+                font-size: 0.75rem;
+            }
+            
+            /* Selects and inputs smaller */
+            .controls select {
+                padding: 6px 8px;
+                font-size: 0.85rem;
+            }
+
+            /* Minimum score slider more compact */
+            #minLensScoreValue {
+                font-size: 0.9rem;
+                min-width: 40px;
             }
             
             /* Search button */
             .search-btn {
-                padding: 12px;
-                font-size: 0.95rem;
-                min-height: 44px;
+                padding: 10px;
+                font-size: 0.9rem;
+                min-height: 40px;
+                margin-top: 4px;
             }
 
-            /* Results list */
+            /* Results count smaller */
+            #resultsCount {
+                font-size: 0.8rem;
+                margin-top: 4px;
+            }
+
+            /* Results list - maximize scroll area */
             .results-list {
-                padding: 12px;
+                padding: 10px;
                 flex: 1;
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
-            /* Cards mobile */
+            /* Cards mobile - more compact */
             .card {
-                padding: 12px;
-                margin-bottom: 12px;
+                padding: 10px;
+                margin-bottom: 10px;
                 flex-direction: row;
-                gap: 10px;
+                gap: 8px;
             }
             .card .info {
                 flex: 1;
                 min-width: 0;
             }
             .card .info h2 {
-                font-size: 1rem;
+                font-size: 0.95rem;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .card .meta {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
             .card .score-box {
-                min-width: 60px;
+                min-width: 55px;
                 flex-shrink: 0;
             }
             .card .dive-score {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
             .card .score-sub {
-                font-size: 0.68rem;
-            }
-            .card .gem-label {
                 font-size: 0.65rem;
             }
+            .card .gem-label {
+                font-size: 0.6rem;
+            }
             .badges {
-                gap: 4px;
+                gap: 3px;
+                margin-top: 6px;
             }
             .badge {
-                font-size: 0.7rem;
-                padding: 2px 5px;
+                font-size: 0.65rem;
+                padding: 2px 4px;
             }
-
-            /* View toggle in sidebar */
-            .view-toggle {
-                margin: 0 12px 8px 12px;
-            }
-            .view-toggle button {
-                padding: 10px 12px;
-                min-height: 44px;
+            .maps-link {
+                font-size: 0.65rem;
+                padding: 2px 6px;
             }
 
             /* Vibe map mobile */
             .vibe-map-container {
-                padding: 12px;
+                padding: 10px;
             }
             .vibe-map-header {
-                padding: 10px 12px;
+                padding: 8px 10px;
+                margin-bottom: 8px;
             }
             .vibe-map-header h4 {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                margin-bottom: 4px;
             }
             .vibe-map-header p {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
             }
             .vibe-map-chart-wrapper {
-                max-height: calc(100vh - 340px);
+                max-height: calc(100vh - 280px);
             }
             .vibe-map-legend {
-                gap: 8px;
-                font-size: 0.7rem;
-                padding: 8px 0;
+                gap: 6px;
+                font-size: 0.65rem;
+                padding: 6px 0;
                 flex-wrap: wrap;
             }
 
             /* Custom lens builder mobile */
             .custom-lens-builder {
-                padding: 12px;
+                padding: 10px;
+            }
+            .custom-lens-builder h4 {
+                font-size: 0.85rem;
+                margin-bottom: 10px;
             }
             .signal-slider {
-                gap: 8px;
+                gap: 6px;
+                margin-bottom: 6px;
             }
             .signal-slider label {
-                flex: 0 0 100px;
-                font-size: 0.72rem;
+                flex: 0 0 90px;
+                font-size: 0.7rem;
             }
             .signal-slider .weight-value {
-                flex: 0 0 35px;
-                font-size: 0.75rem;
+                flex: 0 0 32px;
+                font-size: 0.7rem;
+            }
+            .custom-lens-actions {
+                margin-top: 10px;
             }
             .custom-lens-actions button {
-                min-height: 44px;
+                min-height: 38px;
+                font-size: 0.8rem;
             }
 
             /* Details panel - full screen slide up */
@@ -888,7 +948,7 @@
                 transform: translateY(0);
             }
             .details-header {
-                padding: 16px;
+                padding: 14px;
             }
             .details-header::before {
                 content: '';
@@ -897,16 +957,17 @@
                 height: 4px;
                 background: #e2e8f0;
                 border-radius: 2px;
-                margin: 0 auto 12px;
+                margin: 0 auto 10px;
             }
             .details-body {
-                padding: 0 16px 24px;
-                padding-bottom: calc(24px + env(safe-area-inset-bottom, 0));
+                padding: 0 14px 20px;
+                padding-bottom: calc(20px + env(safe-area-inset-bottom, 0));
             }
             .close-btn {
-                min-height: 44px;
-                min-width: 44px;
-                padding: 8px 14px;
+                min-height: 40px;
+                min-width: 40px;
+                padding: 6px 12px;
+                font-size: 0.85rem;
             }
 
             /* Modals mobile */
@@ -930,34 +991,37 @@
                 min-height: 48px;
             }
 
-            /* Info button bigger touch target */
+            /* Info button */
             .info-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-            }
-
-            /* Filters toggle button */
-            .filters-toggle button {
-                min-height: 40px;
-                padding: 8px 12px;
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
             }
         }
 
         /* Extra small screens */
         @media (max-width: 380px) {
             h1 {
-                font-size: 1rem;
-            }
-            .card .info h2 {
                 font-size: 0.95rem;
             }
+            .tagline {
+                font-size: 0.65rem;
+            }
+            .card .info h2 {
+                font-size: 0.9rem;
+            }
             .card .dive-score {
-                font-size: 1.6rem;
+                font-size: 1.4rem;
             }
             .signal-slider label {
-                flex: 0 0 85px;
-                font-size: 0.68rem;
+                flex: 0 0 80px;
+                font-size: 0.65rem;
+            }
+            .mobile-tab {
+                font-size: 0.65rem;
+            }
+            .mobile-tab-icon {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -1186,10 +1250,22 @@
                     <button id="toggleAdvancedBtn" type="button" onclick="toggleAdvancedFilters()">More filters</button>
                 </div>
                 <div class="controls">
-                    <div class="control-group">
+                    <!-- Minimum score - always visible -->
+                    <div class="control-group" style="grid-column: span 2;">
+                        <label>Minimum score</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input id="minLensScore" type="range" min="0" max="10" step="0.1" value="0"
+                                   style="flex:1; accent-color:#2c3e50;"
+                                   oninput="onMinScoreChanged()" />
+                            <div id="minLensScoreValue" style="min-width:40px; text-align:right; font-weight:800; color:#2c3e50;">0.0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lens - hidden on mobile, shown in More Filters -->
+                    <div class="control-group mobile-advanced">
                         <label>Lens</label>
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="lens" onchange="onLensChange()" style="flex:1;">
+                            <select id="lens" onchange="syncLens('main')" style="flex:1;">
                                 <option value="blended_0_10" selected>Blended</option>
                                 <option value="quality_0_10">Quality</option>
                                 <option value="character_0_10">Character</option>
@@ -1199,18 +1275,11 @@
                             <button class="info-btn" type="button" title="What do these lenses mean?" onclick="openLensInfo()">i</button>
                         </div>
                     </div>
-                    <div class="control-group" style="grid-column: span 2;">
-                        <label>Minimum score</label>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <input id="minLensScore" type="range" min="0" max="10" step="0.1" value="0"
-                                   style="flex:1; accent-color:#2c3e50;"
-                                   oninput="onMinScoreChanged()" />
-                            <div id="minLensScoreValue" style="min-width:48px; text-align:right; font-weight:800; color:#2c3e50;">0.0</div>
-                        </div>
-                    </div>
-                    <div class="control-group" style="grid-column: span 2;">
+                    
+                    <!-- Type - hidden on mobile, shown in More Filters -->
+                    <div class="control-group mobile-advanced">
                         <label>Type</label>
-                        <select id="typeFilter" title="Choose what kind of places to include">
+                        <select id="typeFilter" title="Choose what kind of places to include" onchange="syncTypeFilter('main')">
                             <option value="all" selected>All</option>
                             <option value="bar">Bar</option>
                             <option value="restaurant">Restaurant</option>
@@ -1273,6 +1342,30 @@
                     </div>
                     
                     <div id="advancedFilters" class="advanced-filters">
+                        <!-- Lens - shown in More Filters on mobile -->
+                        <div class="control-group mobile-show" style="display:none;">
+                            <label>Lens</label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <select id="lensAdvanced" onchange="syncLens('advanced')" style="flex:1;">
+                                    <option value="blended_0_10" selected>Blended</option>
+                                    <option value="quality_0_10">Quality</option>
+                                    <option value="character_0_10">Character</option>
+                                    <option value="underrated_0_10">Underrated</option>
+                                    <option value="custom">Custom...</option>
+                                </select>
+                                <button class="info-btn" type="button" title="What do these lenses mean?" onclick="openLensInfo()">i</button>
+                            </div>
+                        </div>
+                        <!-- Type - shown in More Filters on mobile -->
+                        <div class="control-group mobile-show" style="display:none;">
+                            <label>Type</label>
+                            <select id="typeFilterAdvanced" onchange="syncTypeFilter('advanced')">
+                                <option value="all" selected>All</option>
+                                <option value="bar">Bar</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="both">Both (Bar + Restaurant)</option>
+                            </select>
+                        </div>
                         <div class="control-group">
                             <label>Min Google Rating</label>
                             <select id="minRating">
@@ -1346,6 +1439,10 @@
             <button class="mobile-tab active" id="mobileListTab" onclick="switchMobileTab('list')" role="tab" aria-selected="true">
                 <span class="mobile-tab-icon">📋</span>
                 <span>List</span>
+            </button>
+            <button class="mobile-tab" id="mobileVibeTab" onclick="switchMobileTab('vibe')" role="tab" aria-selected="false">
+                <span class="mobile-tab-icon">🎯</span>
+                <span>Vibe</span>
             </button>
             <button class="mobile-tab" id="mobileMapTab" onclick="switchMobileTab('map')" role="tab" aria-selected="false">
                 <span class="mobile-tab-icon">🗺️</span>
@@ -1738,8 +1835,22 @@
         function toggleAdvancedFilters() {
             const box = document.getElementById('advancedFilters');
             const btn = document.getElementById('toggleAdvancedBtn');
+            const mobileAdvanced = document.querySelectorAll('.control-group.mobile-advanced');
             const isOpen = box.classList.toggle('show');
             btn.textContent = isOpen ? 'Hide filters' : 'More filters';
+            
+            // On mobile, also show/hide the inline mobile-advanced fields
+            if (window.innerWidth <= 768) {
+                mobileAdvanced.forEach(el => {
+                    el.style.display = isOpen ? 'flex' : 'none';
+                });
+            }
+            
+            // Sync values between main and advanced selects
+            const lensAdvanced = document.getElementById('lensAdvanced');
+            const typeAdvanced = document.getElementById('typeFilterAdvanced');
+            if (lensAdvanced) lensAdvanced.value = document.getElementById('lens').value;
+            if (typeAdvanced) typeAdvanced.value = document.getElementById('typeFilter').value;
         }
 
         function openCityRequest() {
@@ -1873,7 +1984,13 @@
 
         function onLensChange() {
             const lens = document.getElementById('lens').value;
+            const lensAdvanced = document.getElementById('lensAdvanced');
             const builder = document.getElementById('customLensBuilder');
+            
+            // Sync the advanced lens select
+            if (lensAdvanced && lensAdvanced.value !== lens) {
+                lensAdvanced.value = lens;
+            }
             
             if (lens === 'custom') {
                 builder.classList.add('show');
@@ -2241,7 +2358,7 @@
             document.getElementById('mobileMenuOverlay').classList.remove('show');
         }
 
-        // Mobile Tab Switching (List/Map)
+        // Mobile Tab Switching (List/Vibe/Map)
         let currentMobileTab = 'list';
 
         function switchMobileTab(tab) {
@@ -2249,24 +2366,61 @@
             const sidebar = document.querySelector('.sidebar');
             const mapEl = document.getElementById('map');
             const listTab = document.getElementById('mobileListTab');
+            const vibeTab = document.getElementById('mobileVibeTab');
             const mapTab = document.getElementById('mobileMapTab');
+
+            // Reset all tabs
+            [listTab, vibeTab, mapTab].forEach(t => {
+                if (t) {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                }
+            });
 
             if (tab === 'list') {
                 sidebar.classList.remove('mobile-hidden');
                 mapEl.classList.add('mobile-hidden');
                 listTab.classList.add('active');
                 listTab.setAttribute('aria-selected', 'true');
-                mapTab.classList.remove('active');
-                mapTab.setAttribute('aria-selected', 'false');
+                // Switch to list view in sidebar
+                switchView('list');
+            } else if (tab === 'vibe') {
+                sidebar.classList.remove('mobile-hidden');
+                mapEl.classList.add('mobile-hidden');
+                vibeTab.classList.add('active');
+                vibeTab.setAttribute('aria-selected', 'true');
+                // Switch to vibe map view in sidebar
+                switchView('vibe');
             } else {
                 sidebar.classList.add('mobile-hidden');
                 mapEl.classList.remove('mobile-hidden');
-                listTab.classList.remove('active');
-                listTab.setAttribute('aria-selected', 'false');
                 mapTab.classList.add('active');
                 mapTab.setAttribute('aria-selected', 'true');
                 // Invalidate map size when shown (fixes rendering issues)
                 setTimeout(() => map.invalidateSize(), 100);
+            }
+        }
+
+        // Sync lens selects (main and advanced)
+        function syncLens(source) {
+            const main = document.getElementById('lens');
+            const advanced = document.getElementById('lensAdvanced');
+            if (source === 'advanced' && advanced && main) {
+                main.value = advanced.value;
+            } else if (main && advanced) {
+                advanced.value = main.value;
+            }
+            onLensChange();
+        }
+
+        // Sync type filter selects (main and advanced)
+        function syncTypeFilter(source) {
+            const main = document.getElementById('typeFilter');
+            const advanced = document.getElementById('typeFilterAdvanced');
+            if (source === 'advanced' && advanced && main) {
+                main.value = advanced.value;
+            } else if (main && advanced) {
+                advanced.value = main.value;
             }
         }
 
@@ -2275,15 +2429,22 @@
             const isMobile = window.innerWidth <= 768;
             const sidebar = document.querySelector('.sidebar');
             const mapEl = document.getElementById('map');
+            const mobileAdvanced = document.querySelectorAll('.control-group.mobile-advanced');
             
             if (!isMobile) {
-                // Desktop: ensure both are visible
+                // Desktop: ensure both are visible, show desktop-only controls
                 sidebar.classList.remove('mobile-hidden');
                 mapEl.classList.remove('mobile-hidden');
                 closeMobileMenu();
+                // Show desktop controls (Lens, Type)
+                mobileAdvanced.forEach(el => el.style.display = '');
             } else {
-                // Mobile: apply current tab state
+                // Mobile: apply current tab state, hide controls unless More Filters is open
                 switchMobileTab(currentMobileTab);
+                const advancedOpen = document.getElementById('advancedFilters').classList.contains('show');
+                mobileAdvanced.forEach(el => {
+                    el.style.display = advancedOpen ? 'flex' : 'none';
+                });
             }
         }
 
@@ -2293,6 +2454,10 @@
         function initMobileState() {
             if (window.innerWidth <= 768) {
                 switchMobileTab('list');
+                // Hide mobile-advanced controls initially
+                document.querySelectorAll('.control-group.mobile-advanced').forEach(el => {
+                    el.style.display = 'none';
+                });
             }
         }
 

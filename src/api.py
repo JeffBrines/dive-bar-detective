@@ -128,6 +128,26 @@ def _percentile_sorted(sorted_vals: List[float], pct: float) -> float:
     w = idx - lo
     return float(sorted_vals[lo]) * (1.0 - w) + float(sorted_vals[hi]) * w
 
+
+def normalize_to_percentile(places: List[dict], field: str, target_min: float = 2.0, target_max: float = 9.5) -> None:
+    """
+    Normalize a score field to percentile-based ranking within the dataset.
+    Top place gets target_max, bottom gets target_min.
+    This ensures all lenses have the same score distribution.
+    """
+    values = [(i, p.get(field)) for i, p in enumerate(places)]
+    values = [(i, v) for i, v in values if isinstance(v, (int, float)) and not math.isnan(v)]
+    
+    if len(values) < 2:
+        return
+    
+    values.sort(key=lambda x: x[1])
+    n = len(values)
+    for rank, (idx, _) in enumerate(values):
+        percentile = rank / (n - 1)
+        new_score = target_min + percentile * (target_max - target_min)
+        places[idx][field] = round(new_score, 1)
+
 def character_0_10(place: dict) -> Optional[float]:
     """
     Character score (0..10): Does this place have soul?
@@ -466,6 +486,15 @@ def get_locations(
         # Process and enrich
         enriched_results = [enrich_place(place, underrated_scale=underrated_scale) for place in results]
         
+        # Normalize each lens to percentiles so all top out ~9.5
+        normalize_to_percentile(enriched_results, "quality_0_10")
+        normalize_to_percentile(enriched_results, "character_0_10")
+        normalize_to_percentile(enriched_results, "underrated_0_10")
+        
+        # Recalculate blended after normalization
+        for place in enriched_results:
+            place["blended_0_10"] = blended_0_10(place)
+        
         # Filter by min Google review count (in memory to handle nulls)
         if min_reviews and min_reviews > 0:
             enriched_results = [
@@ -521,7 +550,18 @@ def get_vibes(
             q = q.eq("vibe_tag", vibe_tag)
         resp = q.limit(limit).execute()
         # Enrich with computed scores
-        return [enrich_place(p) for p in resp.data]
+        enriched_results = [enrich_place(p) for p in resp.data]
+        
+        # Normalize each lens to percentiles so all top out ~9.5
+        normalize_to_percentile(enriched_results, "quality_0_10")
+        normalize_to_percentile(enriched_results, "character_0_10")
+        normalize_to_percentile(enriched_results, "underrated_0_10")
+        
+        # Recalculate blended after normalization
+        for place in enriched_results:
+            place["blended_0_10"] = blended_0_10(place)
+        
+        return enriched_results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -580,6 +620,15 @@ def get_locations_custom(
         
         # Enrich with standard scores first
         enriched_results = [enrich_place(place) for place in results]
+        
+        # Normalize each lens to percentiles so all top out ~9.5
+        normalize_to_percentile(enriched_results, "quality_0_10")
+        normalize_to_percentile(enriched_results, "character_0_10")
+        normalize_to_percentile(enriched_results, "underrated_0_10")
+        
+        # Recalculate blended after normalization
+        for place in enriched_results:
+            place["blended_0_10"] = blended_0_10(place)
         
         # Filter by min reviews
         if min_reviews and min_reviews > 0:

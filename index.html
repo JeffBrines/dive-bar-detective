@@ -336,6 +336,156 @@
 
         .loading { text-align: center; margin-top: 30px; color: #666; }
 
+        /* Mobile Map Floating Filter Bar */
+        .mobile-map-filters {
+            display: none;
+            position: fixed;
+            top: 58px;
+            left: 10px;
+            right: 10px;
+            z-index: 500;
+        }
+        .mobile-map-filters.show { display: block; }
+        .mobile-map-filters-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            width: auto;
+        }
+        .mobile-map-filters-icon {
+            font-size: 1rem;
+        }
+        .mobile-map-filters-panel {
+            display: none;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .mobile-map-filters-panel.show { display: block; }
+        .mobile-map-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .mobile-map-filter-row label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            min-width: 65px;
+        }
+        .mobile-map-filter-row input[type="range"] {
+            flex: 1;
+            accent-color: #2c3e50;
+        }
+        .mobile-map-filter-row span {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #2c3e50;
+            min-width: 32px;
+            text-align: right;
+        }
+        .mobile-map-apply-btn {
+            width: 100%;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .mobile-map-apply-btn:hover { background: #34495e; }
+
+        /* Vibe Map Quick Preview (mobile) */
+        .vibe-preview-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 1800;
+        }
+        .vibe-preview-overlay.show { display: block; }
+        .vibe-preview {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 10px;
+            right: 10px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1850;
+            padding: 14px;
+        }
+        .vibe-preview.show { display: block; }
+        .vibe-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .vibe-preview-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-decoration: none;
+            flex: 1;
+        }
+        .vibe-preview-name:hover { text-decoration: underline; }
+        .vibe-preview-close {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            width: 28px;
+            height: 28px;
+        }
+        .vibe-preview-scores {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .vibe-preview-score {
+            text-align: center;
+            flex: 1;
+        }
+        .vibe-preview-label {
+            display: block;
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        .vibe-preview-value {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #2c3e50;
+        }
+        .vibe-preview-hint {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
         /* Details Panel */
         .overlay {
             position: fixed;
@@ -790,10 +940,6 @@
             }
             .advanced-filters.show .control-group.mobile-advanced {
                 display: flex;
-            }
-            /* Show Lens/Type in advanced filters on mobile */
-            .advanced-filters .mobile-show {
-                display: flex !important;
             }
 
             /* Controls grid - single column on mobile for compactness */
@@ -1351,30 +1497,6 @@
                     </div>
                     
                     <div id="advancedFilters" class="advanced-filters">
-                        <!-- Lens - shown in More Filters on mobile -->
-                        <div class="control-group mobile-show" style="display:none;">
-                            <label>Lens</label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <select id="lensAdvanced" onchange="syncLens('advanced')" style="flex:1;">
-                                    <option value="blended_0_10" selected>Blended</option>
-                                    <option value="quality_0_10">Quality</option>
-                                    <option value="character_0_10">Character</option>
-                                    <option value="underrated_0_10">Underrated</option>
-                                    <option value="custom">Custom...</option>
-                                </select>
-                                <button class="info-btn" type="button" title="What do these lenses mean?" onclick="openLensInfo()">i</button>
-                            </div>
-                        </div>
-                        <!-- Type - shown in More Filters on mobile -->
-                        <div class="control-group mobile-show" style="display:none;">
-                            <label>Type</label>
-                            <select id="typeFilterAdvanced" onchange="syncTypeFilter('advanced')">
-                                <option value="all" selected>All</option>
-                                <option value="bar">Bar</option>
-                                <option value="restaurant">Restaurant</option>
-                                <option value="both">Both (Bar + Restaurant)</option>
-                            </select>
-                        </div>
                         <div class="control-group">
                             <label>Min Google Rating</label>
                             <select id="minRating">
@@ -1459,6 +1581,47 @@
             </button>
         </div>
     </nav>
+
+    <!-- Mobile Map Floating Filter Bar -->
+    <div id="mobileMapFilters" class="mobile-map-filters">
+        <button class="mobile-map-filters-toggle" onclick="toggleMobileMapFilters()">
+            <span class="mobile-map-filters-icon">⚙️</span>
+            <span id="mobileMapFiltersLabel">Filters</span>
+        </button>
+        <div id="mobileMapFiltersPanel" class="mobile-map-filters-panel">
+            <div class="mobile-map-filter-row">
+                <label>Min Score</label>
+                <input id="mobileMinScore" type="range" min="0" max="10" step="0.1" value="0"
+                       oninput="syncMobileMinScore()" />
+                <span id="mobileMinScoreValue">0.0</span>
+            </div>
+            <button class="mobile-map-apply-btn" onclick="applyMobileFilters()">Apply</button>
+        </div>
+    </div>
+
+    <!-- Mobile Vibe Map Quick Preview -->
+    <div id="vibePreviewOverlay" class="vibe-preview-overlay" onclick="closeVibePreview()"></div>
+    <div id="vibePreview" class="vibe-preview" aria-hidden="true">
+        <div class="vibe-preview-header">
+            <a id="vibePreviewName" href="#" class="vibe-preview-name" onclick="openVibePreviewDetails(); return false;">Loading...</a>
+            <button class="vibe-preview-close" onclick="closeVibePreview()">&times;</button>
+        </div>
+        <div class="vibe-preview-scores">
+            <div class="vibe-preview-score">
+                <span class="vibe-preview-label">Quality</span>
+                <span id="vibePreviewQuality" class="vibe-preview-value">--</span>
+            </div>
+            <div class="vibe-preview-score">
+                <span class="vibe-preview-label">Character</span>
+                <span id="vibePreviewCharacter" class="vibe-preview-value">--</span>
+            </div>
+            <div class="vibe-preview-score">
+                <span class="vibe-preview-label">Blended</span>
+                <span id="vibePreviewBlended" class="vibe-preview-value">--</span>
+            </div>
+        </div>
+        <div class="vibe-preview-hint">Tap name for full details</div>
+    </div>
 
     <!-- Details Panel -->
     <div id="overlay" class="overlay" onclick="closeDetails()"></div>
@@ -2160,11 +2323,11 @@
             const medianQ = sortedQ[Math.floor(sortedQ.length / 2)] || 5;
             const medianC = sortedC[Math.floor(sortedC.length / 2)] || 5;
             
-            // Calculate data bounds with padding
-            const minQ = Math.min(...qualities) - 0.5;
-            const maxQ = Math.max(...qualities) + 0.5;
-            const minC = Math.min(...characters) - 0.5;
-            const maxC = Math.max(...characters) + 0.5;
+            // Calculate data bounds with padding (zoom out more to prevent label overlap)
+            const minQ = Math.min(...qualities) - 1.0;
+            const maxQ = Math.max(...qualities) + 1.0;
+            const minC = Math.min(...characters) - 1.0;
+            const maxC = Math.max(...characters) + 1.0;
             
             // Store for quadrant plugin
             window.vibeMapMedians = { q: medianQ, c: medianC };
@@ -2249,14 +2412,14 @@
                     ctx.fillStyle = 'rgba(100, 116, 139, 0.6)';
                     ctx.textAlign = 'center';
                     
-                    // Top-right: Hidden Gems (above median on both)
-                    ctx.fillText('🌟 Best Finds', (midX + right) / 2, top + 15);
+                    // Top-right: Hidden Gems (above median on both) - positioned further from edge
+                    ctx.fillText('🌟 Best Finds', (midX + right) / 2, top + 5);
                     // Top-left: Character over Quality
-                    ctx.fillText('🍺 Character', (left + midX) / 2, top + 15);
+                    ctx.fillText('🍺 Character', (left + midX) / 2, top + 5);
                     // Bottom-right: Quality over Character
-                    ctx.fillText('✨ Quality', (midX + right) / 2, bottom - 8);
+                    ctx.fillText('✨ Quality', (midX + right) / 2, bottom - 18);
                     // Bottom-left: Below median on both
-                    ctx.fillText('📍 Average', (left + midX) / 2, bottom - 8);
+                    ctx.fillText('📍 Average', (left + midX) / 2, bottom - 18);
                     
                     ctx.restore();
                 }
@@ -2276,6 +2439,9 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 20, bottom: 25, left: 10, right: 10 }
+                    },
                     plugins: {
                         legend: { display: false },
                         zoom: {
@@ -2330,12 +2496,19 @@
                         if (elements.length > 0) {
                             const idx = elements[0].index;
                             const place = dataPoints[idx].place;
-                            openDetails(place);
-                            // Also highlight on map
-                            if (place.lat && place.lng) {
-                                map.flyTo([place.lat, place.lng], 16);
-                                const marker = markerByPlaceId[place.place_id];
-                                if (marker) marker.openPopup();
+                            
+                            // On mobile, show quick preview first
+                            if (window.innerWidth <= 768) {
+                                showVibePreview(place);
+                            } else {
+                                // Desktop: open full details directly
+                                openDetails(place);
+                                // Also highlight on map
+                                if (place.lat && place.lng) {
+                                    map.flyTo([place.lat, place.lng], 16);
+                                    const marker = markerByPlaceId[place.place_id];
+                                    if (marker) marker.openPopup();
+                                }
                             }
                         }
                     }
@@ -2352,6 +2525,82 @@
             if (vibeMapChart) {
                 vibeMapChart.resetZoom();
             }
+        }
+
+        // Mobile Vibe Map Quick Preview
+        let vibePreviewPlace = null;
+
+        function showVibePreview(place) {
+            vibePreviewPlace = place;
+            document.getElementById('vibePreviewName').textContent = place.name || 'Unknown';
+            document.getElementById('vibePreviewQuality').textContent = 
+                typeof place.quality_0_10 === 'number' ? place.quality_0_10.toFixed(1) : '--';
+            document.getElementById('vibePreviewCharacter').textContent = 
+                typeof place.character_0_10 === 'number' ? place.character_0_10.toFixed(1) : '--';
+            document.getElementById('vibePreviewBlended').textContent = 
+                typeof place.blended_0_10 === 'number' ? place.blended_0_10.toFixed(1) : '--';
+            
+            document.getElementById('vibePreviewOverlay').classList.add('show');
+            document.getElementById('vibePreview').classList.add('show');
+        }
+
+        function closeVibePreview() {
+            document.getElementById('vibePreviewOverlay').classList.remove('show');
+            document.getElementById('vibePreview').classList.remove('show');
+            vibePreviewPlace = null;
+        }
+
+        function openVibePreviewDetails() {
+            if (!vibePreviewPlace) return;
+            const place = vibePreviewPlace;
+            closeVibePreview();
+            openDetails(place);
+            // Also highlight on map
+            if (place.lat && place.lng) {
+                map.flyTo([place.lat, place.lng], 16);
+                const marker = markerByPlaceId[place.place_id];
+                if (marker) marker.openPopup();
+            }
+        }
+
+        // Mobile Map Floating Filter Bar
+        function toggleMobileMapFilters() {
+            const panel = document.getElementById('mobileMapFiltersPanel');
+            const isOpen = panel.classList.toggle('show');
+            document.getElementById('mobileMapFiltersLabel').textContent = isOpen ? 'Close' : 'Filters';
+        }
+
+        function syncMobileMinScore() {
+            const val = parseFloat(document.getElementById('mobileMinScore').value);
+            document.getElementById('mobileMinScoreValue').textContent = val.toFixed(1);
+        }
+
+        function applyMobileFilters() {
+            // Sync mobile slider value to main slider
+            const mobileVal = parseFloat(document.getElementById('mobileMinScore').value);
+            document.getElementById('minLensScore').value = mobileVal;
+            document.getElementById('minLensScoreValue').textContent = mobileVal.toFixed(1);
+            
+            // Re-render locations with new filter
+            renderLocations();
+            
+            // Close the filter panel
+            document.getElementById('mobileMapFiltersPanel').classList.remove('show');
+            document.getElementById('mobileMapFiltersLabel').textContent = 'Filters';
+        }
+
+        function showMobileMapFilters() {
+            // Sync the mobile slider with the main slider value
+            const mainVal = parseFloat(document.getElementById('minLensScore').value) || 0;
+            document.getElementById('mobileMinScore').value = mainVal;
+            document.getElementById('mobileMinScoreValue').textContent = mainVal.toFixed(1);
+            document.getElementById('mobileMapFilters').classList.add('show');
+        }
+
+        function hideMobileMapFilters() {
+            document.getElementById('mobileMapFilters').classList.remove('show');
+            document.getElementById('mobileMapFiltersPanel').classList.remove('show');
+            document.getElementById('mobileMapFiltersLabel').textContent = 'Filters';
         }
 
         // Mobile Menu Functions
@@ -2393,6 +2642,7 @@
                 listTab.setAttribute('aria-selected', 'true');
                 // Switch to list view in sidebar
                 switchView('list');
+                hideMobileMapFilters();
             } else if (tab === 'vibe') {
                 sidebar.classList.remove('mobile-hidden');
                 mapEl.classList.add('mobile-hidden');
@@ -2400,6 +2650,7 @@
                 vibeTab.setAttribute('aria-selected', 'true');
                 // Switch to vibe map view in sidebar
                 switchView('vibe');
+                hideMobileMapFilters();
             } else {
                 sidebar.classList.add('mobile-hidden');
                 mapEl.classList.remove('mobile-hidden');
@@ -2407,6 +2658,8 @@
                 mapTab.setAttribute('aria-selected', 'true');
                 // Invalidate map size when shown (fixes rendering issues)
                 setTimeout(() => map.invalidateSize(), 100);
+                // Show floating filter bar on map view
+                showMobileMapFilters();
             }
         }
 
@@ -2445,6 +2698,7 @@
                 sidebar.classList.remove('mobile-hidden');
                 mapEl.classList.remove('mobile-hidden');
                 closeMobileMenu();
+                hideMobileMapFilters();
                 // Show desktop controls (Lens, Type)
                 mobileAdvanced.forEach(el => el.style.display = '');
             } else {
